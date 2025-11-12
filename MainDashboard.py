@@ -1,7 +1,7 @@
+import tkinter
 import tkinter as tk
-from tkinter import messagebox
-from tkinter import PhotoImage
-from PIL import Image, ImageTk, ImageDraw
+import tkinter.font as tkFont
+from PIL import ImageFont
 
 #main window
 root = tk.Tk()
@@ -14,8 +14,19 @@ root.configure(background="#F9FAFB")
 sideBar = tk.Frame(root, bg="#F9D162", width=300, height=700)
 sideBar.place(relx=0, rely=0)
 
+#font
+font_pth = r"C:\Users\user\OneDrive\Documents\fonts\beachday.ttf"
+try:
+    pil_font = ImageFont.truetype(font_pth, 18)
+    font_name = pil_font.getname()[0]  # Extract the font family name
+    custom_font = tkFont.Font(family=font_name, size=23, weight="bold")
+    pet_font = tkFont.Font(family=font_name, size=30, weight="bold")
+except Exception as e:
+    print("⚠️ Could not load custom font:", e)
+    custom_font = ("Comic Sans MS", 18, "bold")
+
 #logo
-logo_Label = tk.Label(sideBar, text="CUDDLE CORNER", bg="#F9D162", fg="#2D3436", font=("Comic Sans MS", 18, "bold"))
+logo_Label = tk.Label(sideBar, text="CUDDLE CORNER", bg="#F9D162", fg="#2D3436", font=custom_font)
 logo_Label.place(x=40, y=20)
 
 #section line whatever
@@ -60,9 +71,8 @@ content = tk.Frame(root, bg="#5BB8E9", height=150, width=950)
 content.place(x=300, y=300)
 
 #grabe kaau ang error!! How to make a circular frame!!!
-
 pet = tk.Label(content, text="Meet MingMing!", bg="#5BB8E9",
-                    fg="#2D3436", font=("Comic Sans MS", 24, "bold"))
+                    fg="#2D3436", font=pet_font)
 pet.place(x=400, y=10)
 
 pet2 = tk.Label(content, text="Say hello to Mingming! This loving furball is"
