@@ -1,6 +1,6 @@
-import tkinter
 import tkinter as tk
 import tkinter.font as tkFont
+
 from PIL import ImageFont
 
 #main window
@@ -22,10 +22,10 @@ try:
     custom_font = tkFont.Font(family=font_name, size=23, weight="bold")
     pet_font = tkFont.Font(family=font_name, size=30, weight="bold")
 except Exception as e:
-    print("⚠️ Could not load custom font:", e)
+    print("Could not load custom font:", e)
     custom_font = ("Comic Sans MS", 18, "bold")
 
-#logo
+    #logo
 logo_Label = tk.Label(sideBar, text="CUDDLE CORNER", bg="#F9D162", fg="#2D3436", font=custom_font)
 logo_Label.place(x=40, y=20)
 
@@ -51,7 +51,7 @@ pets_btn = tk.Button(sideBar, text="Pets", bg="#F9D162", fg="#2D3436",
                       font=("Arial", 12, "bold"), relief="flat", width=20, height=2)
 pets_btn.place(x=40, y=230)
 
-products_btn = tk.Button(sideBar, text="Pets", bg="#F9D162", fg="#2D3436",
+products_btn = tk.Button(sideBar, text="Products", bg="#F9D162", fg="#2D3436",
                       font=("Arial", 12, "bold"), relief="flat", width=20, height=2)
 products_btn.place(x=40, y=280)
 
@@ -71,8 +71,7 @@ content = tk.Frame(root, bg="#5BB8E9", height=150, width=950)
 content.place(x=300, y=300)
 
 #grabe kaau ang error!! How to make a circular frame!!!
-pet = tk.Label(content, text="Meet MingMing!", bg="#5BB8E9",
-                    fg="#2D3436", font=pet_font)
+pet = tk.Label(content, text="Meet MingMing!", bg="#5BB8E9", fg="#2D3436", font=pet_font)
 pet.place(x=400, y=10)
 
 pet2 = tk.Label(content, text="Say hello to Mingming! This loving furball is"
