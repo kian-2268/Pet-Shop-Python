@@ -1,0 +1,273 @@
+import tkinter as tk
+import tkinter.font as tkFont
+from PIL import ImageFont
+
+# -------------------- Main Window --------------------
+root = tk.Tk()
+root.title("Cuddle Corner")
+root.geometry("1200x700+140+60")
+root.resizable(False, False)
+root.configure(background="#F9FAFB")
+
+# -------------------- Sidebar --------------------
+sideBar = tk.Frame(root, bg="#F9D162", width=300, height=700)
+sideBar.place(relx=0, rely=0)
+
+# -------------------- Fonts --------------------
+font_pth = r"C:\Users\Jude\Desktop\Python Installed Files\beachday.ttf"
+try:
+    pil_font = ImageFont.truetype(font_pth, 18)
+    font_name = pil_font.getname()[0]  # Extract font family name
+    custom_font = tkFont.Font(family=font_name, size=23, weight="bold")
+    pet_font = tkFont.Font(family=font_name, size=30, weight="bold")
+except Exception as e:
+    print("⚠️ Could not load custom font:", e)
+    custom_font = ("Comic Sans MS", 18, "bold")
+    pet_font = ("Comic Sans MS", 30, "bold")
+
+# -------------------- Sidebar Widgets --------------------
+logo_Label = tk.Label(sideBar, text="CUDDLE CORNER", bg="#F9D162", fg="#2D3436", font=custom_font)
+logo_Label.place(x=40, y=20)
+
+line = tk.Frame(sideBar, bg="#F9FAFB", height=2, width=300)
+line.place(x=0, y=80)
+
+logIn_btn = tk.Button(sideBar, text="Log In or \nSign Up", bg="#E67E22", fg="white",
+                      font=("Arial", 12, "bold"), relief="flat", width=20, height=2)
+logIn_btn.place(x=40, y=100)
+
+line2 = tk.Frame(sideBar, bg="#F9FAFB", height=2, width=300)
+line2.place(x=0, y=170)
+
+overview_btn = tk.Button(sideBar, text="Overview", bg="#F9D162", fg="#2D3436",
+                         font=("Arial", 12, "bold"), relief="flat", width=20, height=2)
+overview_btn.place(x=40, y=180)
+
+pets_btn = tk.Button(sideBar, text="Pets", bg="#F9D162", fg="#2D3436",
+                     font=("Arial", 12, "bold"), relief="flat", width=20, height=2)
+pets_btn.place(x=40, y=230)
+
+products_btn = tk.Button(sideBar, text="Products", bg="#F9D162", fg="#2D3436",
+                         font=("Arial", 12, "bold"), relief="flat", width=20, height=2)
+products_btn.place(x=40, y=280)
+
+# -------------------- Header --------------------
+header = tk.Frame(root, bg="#E67E22", height=150, width=950)
+header.place(x=400, y=70)
+
+lbl = tk.Label(header, text="Welcome to Cuddle Corner!", bg="#E67E22", fg="#F9FAFB", font=("Arial", 35, "bold"))
+lbl.place(x=40, y=25)
+
+sub_lbl = tk.Label(header, text="The Happiest Corner for Every Paw!", bg="#E67E22", fg="#F9FAFB",
+                   font=("Arial", 15, "bold"))
+sub_lbl.place(x=40, y=80)
+
+# -------------------- Pixel Art Setup --------------------
+PIXEL_SIZE = 5
+
+# Colors
+DARK_ORANGE = "#FF8C00"
+ORANGE = "#FFA500"
+LIGHT_ORANGE = "#FFD580"
+LIGHT_PINK = "#FFB6C1"
+BLACK = "#000000"
+WHITE = "#FFFFFF"
+BACKGROUND = "#E67E22"
+BACKGROUND2 = "#F9D162"
+
+color_map = {
+    # Cat colors
+    0: BACKGROUND,
+    1: DARK_ORANGE,
+    2: ORANGE,
+    3: LIGHT_ORANGE,
+    4: LIGHT_PINK,
+    5: BLACK,
+    6: WHITE,
+    # Husky colors
+    10: BLACK,
+    11: "#5C5C5C",
+    12: "#D9D9D9",
+    13: WHITE,
+    14: "#00C8FF",
+    15: "#FF0000",
+    19: BACKGROUND2
+}
+
+# -------------------- Pixel Codes --------------------
+pixel_codes_cat = [
+    [0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0],
+    [0,0,2,3,3,2,0,0,0,0,0,0,0,0,0,0,0,2,3,3,2,0,0],
+    [0,0,2,3,3,3,2,0,0,0,0,0,0,0,0,0,2,3,3,3,2,0,0],
+    [0,0,2,3,4,3,3,2,0,0,0,0,0,0,0,2,3,3,4,3,2,0,0],
+    [0,0,2,3,4,4,3,2,0,0,0,0,0,0,0,2,3,4,4,3,2,0,0],
+    [0,0,2,3,4,4,3,3,2,2,2,2,2,2,2,3,3,4,4,3,2,0,0],
+    [0,0,2,3,3,3,3,3,3,1,3,1,3,1,3,3,3,3,3,3,2,0,0],
+    [0,0,2,3,3,3,3,3,3,1,3,1,3,1,3,3,3,3,3,3,2,0,0],
+    [0,0,2,3,3,3,3,3,3,3,3,1,3,3,3,3,3,3,3,3,2,0,0],
+    [0,2,3,3,3,3,3,6,5,3,3,3,3,3,6,5,3,3,3,3,3,2,0],
+    [2,3,3,3,1,1,3,5,5,3,3,3,3,3,5,5,3,1,1,3,3,3,2],
+    [0,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,0],
+    [2,3,3,3,1,1,3,3,1,3,3,1,3,3,1,3,3,1,1,3,3,3,2],
+    [0,2,2,3,3,3,3,3,3,1,1,3,1,1,3,3,3,3,3,3,2,2,0],
+    [0,0,0,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,0,0,0],
+    [0,0,0,0,2,2,3,3,3,3,3,3,3,3,3,3,3,2,2,0,0,0,0],
+    [0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0],
+]
+
+pixel_codes_2 = [
+    [19,19,19,10,19,19,19,19,19,19,19,19,19,19,19,19,19,10,19,19,19],
+    [19,19,10,11,10,19,19,19,19,19,19,19,19,19,19,19,10,11,10,19,19],
+    [19,10,11,11,11,10,19,19,19,19,19,19,19,19,19,10,11,11,11,10,19],
+    [19,10,11,12,11,11,10,19,19,19,19,19,19,19,10,11,11,12,11,10,19],
+    [19,10,11,12,12,11,11,10,10,10,10,10,10,10,11,11,12,12,11,10,19],
+    [19,10,11,12,12,12,11,11,11,11,11,11,11,11,11,12,12,12,11,10,19],
+    [19,10,11,12,12,11,11,11,11,11,11,11,11,11,11,11,12,12,11,10,19],
+    [19,10,11,12,11,11,12,12,11,11,12,11,11,12,12,11,11,12,11,10,19],
+    [19,10,11,11,11,11,12,12,12,11,12,11,12,12,12,11,11,11,11,10,19],
+    [10,11,11,11,11,12,12,12,12,11,12,11,12,12,12,12,11,11,11,11,10],
+    [10,11,11,11,12,12,14,10,12,11,12,11,12,14,10,12,12,11,11,11,10],
+    [10,11,11,12,12,12,10,10,12,11,12,11,12,10,10,12,12,12,11,11,10],
+    [10,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,10],
+    [10,12,12,12,12,12,12,12,10,10,13,10,10,12,12,12,12,12,12,12,10],
+    [19,10,12,12,12,12,12,12,12,10,10,10,12,12,12,12,12,12,12,10,19],
+    [19,10,12,12,12,12,12,12,12,12,10,12,12,12,12,12,12,12,12,10,19],
+    [19,19,10,12,12,12,12,12,10,12,10,12,10,12,12,12,12,12,10,19,19],
+    [19,19,19,10,12,12,12,12,12,10,10,10,12,12,12,12,12,10,19,19,19],
+    [19,19,19,19,10,12,12,12,12,15,15,15,12,12,12,12,10,19,19,19,19],
+    [19,19,19,19,19,10,10,12,12,12,15,15,12,12,10,10,19,19,19,19,19],
+    [19,19,19,19,19,19,19,10,12,12,12,12,12,10,19,19,19,19,19,19,19],
+    [19,19,19,19,19,19,19,19,10,10,10,10,10,19,19,19,19,19,19,19,19],
+
+]
+
+# -------------------- Globals --------------------
+pixel_codes = pixel_codes_cat  # start with Sketch 1
+pixel_offset_y = 0
+direction = 1
+
+# -------------------- Canvas --------------------
+canvas_width = len(pixel_codes_cat[0]) * PIXEL_SIZE
+canvas_height = len(pixel_codes_cat) * PIXEL_SIZE
+canvas = tk.Canvas(header, width=canvas_width, height=canvas_height, bg=BACKGROUND, highlightthickness=0)
+canvas.place(x=650, y=25)
+
+current_pixels = pixel_codes_cat
+pixel_rects = []
+
+# -------------------- Draw Function --------------------
+def draw_pixels():
+    global pixel_rects
+    canvas.delete("all")
+    pixel_rects = []
+    for y, row in enumerate(current_pixels):
+        row_rects = []
+        for x, code in enumerate(row):
+            color = color_map.get(code, BACKGROUND)
+            x1, y1 = x * PIXEL_SIZE, y * PIXEL_SIZE
+            x2, y2 = x1 + PIXEL_SIZE, y1 + PIXEL_SIZE
+            rect = canvas.create_rectangle(x1, y1, x2, y2, fill=color, outline=color)
+            row_rects.append(rect)
+        pixel_rects.append(row_rects)
+
+draw_pixels()
+
+# -------------------- Bobbing --------------------
+cat_offset = 0
+cat_direction = 1
+bob_job = None
+
+def bob():
+    global cat_offset, cat_direction, bob_job
+    canvas.move("all", 0, cat_direction)
+    cat_offset += cat_direction
+    if cat_offset >= 5:
+        cat_direction = -1
+    elif cat_offset <= 0:
+        cat_direction = 1
+    bob_job = canvas.after(100, bob)
+
+bob()  # start bobbing
+
+# -------------------- Husky Canvas --------------------
+HUSKY_PIXEL_SIZE = 10  # smaller or larger than cat PIXEL_SIZE
+
+husky_canvas_width = len(pixel_codes_2[0]) * HUSKY_PIXEL_SIZE
+husky_canvas_height = len(pixel_codes_2) * HUSKY_PIXEL_SIZE
+
+husky_canvas = tk.Canvas(root, width=husky_canvas_width, height=husky_canvas_height,
+                         bg=BACKGROUND2, highlightthickness=0)
+husky_canvas.place(x=45, y=380)  # adjust as needed
+
+current_husky_pixels = pixel_codes_2
+husky_pixel_rects = []
+
+# Draw function for husky
+def draw_husky_pixels():
+    global husky_pixel_rects
+    husky_canvas.delete("all")
+    husky_pixel_rects = []
+    for y, row in enumerate(current_husky_pixels):
+        row_rects = []
+        for x, code in enumerate(row):
+            color = color_map.get(code, BACKGROUND)
+            x1, y1 = x * HUSKY_PIXEL_SIZE, y * HUSKY_PIXEL_SIZE
+            x2, y2 = x1 + HUSKY_PIXEL_SIZE, y1 + HUSKY_PIXEL_SIZE
+            rect = husky_canvas.create_rectangle(x1, y1, x2, y2, fill=color, outline=color)
+            row_rects.append(rect)
+        husky_pixel_rects.append(row_rects)
+
+draw_husky_pixels()
+
+# -------------------- Husky Bobbing --------------------
+husky_offset = 0
+husky_direction = 1
+husky_bob_job = None
+
+def husky_bob():
+    global husky_offset, husky_direction, husky_bob_job
+    husky_canvas.move("all", 0, husky_direction)
+    husky_offset += husky_direction
+    if husky_offset >= 5:
+        husky_direction = -1
+    elif husky_offset <= 0:
+        husky_direction = 1
+    husky_bob_job = husky_canvas.after(100, husky_bob)
+
+husky_bob()  # start bobbing
+
+def bob_husky():
+    global husky_offset, husky_direction, husky_bob_job
+    husky_canvas.move("all", 0, husky_direction)
+    husky_offset += husky_direction
+    if husky_offset >= 5:
+        husky_direction = -1
+    elif husky_offset <= 0:
+        husky_direction = 1
+    husky_bob_job = husky_canvas.after(100, bob_husky)
+
+bob_husky()  # start husky bobbing
+
+# -------------------- Content --------------------
+content = tk.Frame(root, bg="#5BB8E9", height=120, width=950)
+content.place(x=300, y=300)
+
+pet_label = tk.Label(content, text="Meet MingMing!", bg="#5BB8E9", fg="#2D3436", font=pet_font)
+pet_label.place(x=20, y=10)
+
+pet_desc = tk.Label(content, text="Say hello to Mingming! This loving furball is"
+                                   "\nwaiting for a family to call her own. 🐾",
+                    bg="#5BB8E9", fg="#2D3436", font=("Comic Sans MS", 10, "bold"))
+pet_desc.place(x=20, y=60)
+
+# -------------------- Buttons in Overview --------------------
+prod_btn = tk.Button(root, text="PET PRODUCTS AVAILABLE HERE! →", bg="#5BB8E9", fg="#2D3436",
+                     font=("Arial", 12, "bold"), relief="flat", width=40, height=2)
+prod_btn.place(x=800, y=500)
+
+appoint_btn = tk.Button(root, text="NEED APPOINTMENTS? CLICK HERE! →", bg="#5BB8E9", fg="#2D3436",
+                        font=("Arial", 12, "bold"), relief="flat", width=40, height=2)
+appoint_btn.place(x=800, y=570)
+
+# -------------------- Mainloop --------------------
+root.mainloop()
