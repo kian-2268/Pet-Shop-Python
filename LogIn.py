@@ -6,13 +6,18 @@ from tkinter import messagebox
 import subprocess
 
 from PIL import ImageFont
-
+from PIL.ImageTk import PhotoImage
 
 root = tk.Tk()
 root.title("Cuddle Corner")
 root.geometry("500x500+500+150")
 root.resizable(False, False)
 root.configure(background="#E67E22")
+
+#background
+img_path = PhotoImage(file = r"C:\Users\user\Pictures\project\logInBG.png")
+bg_img = tkinter.Label(root, image=img_path)
+bg_img.pack()
 
 #font
 font = r"C:\Users\user\OneDrive\Documents\fonts\beachday.ttf"
@@ -26,12 +31,12 @@ except Exception as e:
     print("Could not load custom font")
     custom = ("Arial", 18, "bold")
 
-logo = tk.Label(root, text="CUDDLE CORNER", bg="#E67E22", fg="#2D3436", font=custom)
+"""logo = tk.Label(root, text="CUDDLE CORNER", bg="#E67E22", fg="#2D3436", font=custom)
 logo.place(x=100, y=50)
 
 sub = tk.Label(root, text="The Happiest Corner for Every Paw!", bg="#E67E22", fg="#2D3436",
                font=("Arial", 12, "bold"))
-sub.place(x=95, y=90)
+sub.place(x=95, y=90)"""
 
 #see password
 def toggle_password():
@@ -64,10 +69,15 @@ def open_MDB():
     email_val = email_field.get()
     password_val = password_field.get()
 
+    #checks email and password field
+    if email_val == "" or password_val == "":
+        tkinter.messagebox.showerror("Log In Failed", "Email or password is required")
+        return
+
     #temp
     if email_val == "admin" or password_val == "1234":
         root.withdraw() #hides window
-        subprocess.Popen(["python", "MainDashBoard.py"]) #open dashboard
+        subprocess.Popen(["python", "Admin.py"]) #open admin (temp)
     else:
         tkinter.messagebox.showerror("Log In Failed", "Invalid email or password")
 
