@@ -30,6 +30,7 @@ try:
 except Exception as e:
     print("Could not load custom font:", e)
     custom_font = ("Arial", 18, "bold")
+    pet_font = ("Arial", 18, "bold")
 
 def load_icon(path, size=(30,30)):
     img = Image.open(path)
