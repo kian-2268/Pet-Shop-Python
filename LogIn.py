@@ -30,6 +30,7 @@ try:
 except Exception as e:
     print("Could not load custom font")
     custom = ("Arial", 18, "bold")
+    btn = ("Arial", 18, "bold")
 
 """logo = tk.Label(root, text="CUDDLE CORNER", bg="#E67E22", fg="#2D3436", font=custom)
 logo.place(x=100, y=50)
@@ -62,8 +63,12 @@ password_field = tk.Entry(root, bg="#F9D162", fg="#2D3436", font=("Arial", 12, "
 password_field.place(x=70, y=290, width=350, height=40)
 
 #see password button
-toggle_button = tk.Button(root, text="Show", command=toggle_password)
+toggle_button = tk.Button(root, text="Show", bg="#E67E22", fg="#2D3436", bd=0, command=toggle_password)
 toggle_button.place(x=380, y=335)
+
+signUp = tk.Label(root, text="Didn't have an account?", bg="#E67E22", fg="#2D3436",
+                      font=("Arial", 10, "bold"))
+signUp.place(x=135, y=445)
 
 def open_MDB():
     email_val = email_field.get()
@@ -81,8 +86,17 @@ def open_MDB():
     else:
         tkinter.messagebox.showerror("Log In Failed", "Invalid email or password")
 
+def open_SignUp():
+    root.withdraw()
+    subprocess.Popen(["python", "SignUp.py"])
+
 #logIn Btn
 logIn = tk.Button(root, text="LOG IN", bg="#5AB9EA", fg="#F9FAFB", font=btn, relief="flat", command=open_MDB)
 logIn.place(x=120, y=400, width=250, height=40)
+
+signUp_btn = tk.Button(root, text="S̲i̲gn̲ ̲U̲p̲", bg="#E67E22", fg="#2D3436",
+                       font=("Arial", 10, "bold"), bd=0, relief="flat", command=open_SignUp)
+signUp_btn.place(x=298, y=441, width=50, height=30)
+
 
 root.mainloop()
