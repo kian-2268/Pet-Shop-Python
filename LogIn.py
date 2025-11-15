@@ -4,6 +4,7 @@ import tkinter.font as tkFont
 from tkinter import messagebox
 
 import subprocess
+import mysql.connector
 
 from PIL import ImageFont
 from PIL.ImageTk import PhotoImage
@@ -79,12 +80,35 @@ def open_MDB():
         tkinter.messagebox.showerror("Log In Failed", "Email or password is required")
         return
 
-    #temp
-    if email_val == "admin" or password_val == "1234":
-        root.withdraw() #hides window
-        subprocess.Popen(["python", "Admin.py"]) #open admin (temp)
-    else:
-        tkinter.messagebox.showerror("Log In Failed", "Invalid email or password")
+    try:
+        # connecting to database
+        conn = mysql.connector.connect(host="localhost", user="root", password="",
+                                       database="cuddle_corner")
+        cursor = conn.cursor()
+
+        #verify roles
+        query = ("SELECT role FROM users WHERE email = %s and password = %s")
+        cursor.execute(query, (email_val, password_val))
+        result = cursor.fetchone()
+
+        conn.close()
+
+        if result:
+            role = result[0] #admin, staff, customer
+            root.withdraw()
+
+            #redirect panels based on roles
+            if role == "admin":
+                subprocess.Popen(["python", "Admin.py"])
+            elif role == "staff":
+                subprocess.Popen(["python", "Staff.py"])
+            else:
+                subprocess.Popen(["python", "Customer.py"])
+        else:
+            tkinter.messagebox.showerror("Log In Failed", "Email or password is required")
+
+    except mysql.connector.Error as error:
+        tkinter.messagebox.showerror("Database Error", f"Error: {error}")
 
 def open_SignUp():
     root.withdraw()
