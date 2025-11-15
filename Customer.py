@@ -52,7 +52,7 @@ line = tk.Frame(sideBar, bg="#F9FAFB", height=2, width=300)
 line.place(x=0, y=80)
 
 #user stff_btn
-user_btn = tk.Button(sideBar, text="Customer", image=user_icon, compound="left", bg="#F1A842", fg="white",
+user_btn = tk.Button(sideBar, text="User", image=user_icon, compound="left", bg="#F1A842", fg="white",
                       font=("Arial", 12, "bold"), relief="flat", width=150, height=40, padx=10, anchor="w")
 user_btn.img = user_icon
 user_btn.place(x=40, y=100)
