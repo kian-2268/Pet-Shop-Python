@@ -5,6 +5,7 @@ from tkinter import messagebox
 
 import subprocess
 import mysql.connector
+from db import get_connection
 
 from PIL import ImageFont
 from PIL.ImageTk import PhotoImage
@@ -75,40 +76,41 @@ def open_MDB():
     email_val = email_field.get()
     password_val = password_field.get()
 
-    #checks email and password field
+    # Check email and password field
     if email_val == "" or password_val == "":
         tkinter.messagebox.showerror("Log In Failed", "Email or password is required")
         return
 
     try:
-        # connecting to database
-        conn = mysql.connector.connect(host="localhost", user="root", password="",
-                                       database="cuddle_corner")
+        # Connect using db.py
+        conn = get_connection()
         cursor = conn.cursor()
 
-        #verify roles
-        query = ("SELECT role FROM users WHERE email = %s and password = %s")
+        # Verify roles
+        query = ("SELECT role, username FROM users WHERE email = %s AND password = %s")
         cursor.execute(query, (email_val, password_val))
         result = cursor.fetchone()
 
         conn.close()
 
         if result:
-            role = result[0] #admin, staff, customer
+            role = result[0]      # admin, staff, customer
+            current_user = result[1]
             root.withdraw()
 
-            #redirect panels based on roles
+            # Redirect based on role
             if role == "admin":
-                subprocess.Popen(["python", "Admin.py"])
+                subprocess.Popen(["python", "Admin.py", current_user])
             elif role == "staff":
-                subprocess.Popen(["python", "Staff.py"])
+                subprocess.Popen(["python", "Staff.py", current_user])
             else:
-                subprocess.Popen(["python", "Customer.py"])
+                subprocess.Popen(["python", "Customer.py", current_user])
         else:
-            tkinter.messagebox.showerror("Log In Failed", "Email or password is required")
+            tkinter.messagebox.showerror("Log In Failed", "Incorrect email or password")
 
-    except mysql.connector.Error as error:
+    except Exception as error:
         tkinter.messagebox.showerror("Database Error", f"Error: {error}")
+
 
 def open_SignUp():
     root.withdraw()
