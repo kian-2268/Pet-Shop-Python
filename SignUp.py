@@ -7,6 +7,7 @@ from tkinter import ttk
 import subprocess
 import calendar
 import mysql.connector
+from db import get_connection
 
 from PIL import ImageFont
 from PIL.ImageTk import PhotoImage
@@ -109,26 +110,28 @@ def open_User():
     day_val = day_var.get()
     year_val = year_var.get()
 
-    #checks email and password field
+    # checks
     if email_val == "" or password_val == "" or username_val == "":
         tkinter.messagebox.showerror("Sign Up Failed", "Please fill all required fields")
         return
 
-    #temp
     if month_val == "Month" or day_val == "Day" or year_val == "Year":
         tkinter.messagebox.showerror("Sign Up Failed", "Please select your birthday")
         return
 
-    #convert birthday to year-month-day format
+    # convert birthday to YYYY-MM-DD format
     month_index = months.index(month_val) + 1
     birthday_f = f"{year_val}-{month_index:02d}-{int(day_val):02d}"
 
     try:
-        conn = mysql.connector.connect(host="localhost", user="root", password="", database="cuddle_corner")
+        # connect using db.py
+        conn = get_connection()
         cursor = conn.cursor()
 
-        query = ("INSERT INTO users (email, username, password, birthday, role) VALUES (%s, %s, %s, %s, %s)")
+        query = ("INSERT INTO users (email, username, password, birthday, role) "
+                 "VALUES (%s, %s, %s, %s, %s)")
         values = (email_val, username_val, password_val, birthday_f, "customer")
+
         cursor.execute(query, values)
         conn.commit()
         conn.close()
@@ -138,7 +141,7 @@ def open_User():
         root.withdraw()
         subprocess.Popen(["python", "LogIn.py"])
 
-    except mysql.connector.Error as error:
+    except Exception as error:
         tkinter.messagebox.showerror("Database Error", f"Error: {error}")
 
 #signUp Btn
