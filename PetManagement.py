@@ -17,10 +17,12 @@ def load_pet_management(parent, current_user):
     pet_management_frame = tk.Frame(parent, bg="#F9FAFB")
     pet_logs_frame = tk.Frame(parent, bg="#5AB9EA")
     add_pets_frame = tk.Frame(parent, bg="#F9D162")
+    edit_pets_frame = tk.Frame(parent, bg="#F9D162")
 
     pet_management_frame.place(relwidth=1, relheight=1)
     pet_logs_frame.place(x=100, y=50, width=700, height=600)
     add_pets_frame.place(x=100, y=50, width=700, height=600)
+    edit_pets_frame.place(x=100, y=50, width=700, height=600)
 
     #icons
     def load_icon(path, size=(24, 24)):
@@ -213,10 +215,248 @@ def load_pet_management(parent, current_user):
                          font=("Arial", 10, "bold"), relief="flat", width=10, command=next_page)
     next_btn.pack(side="left", padx=5)
 
+    # unselect on empty click
+    def unselect(event):
+        region = pet_table.identify("region", event.x, event.y)
+        if region != "cell":
+            pet_table.selection_remove(pet_table.selection())
+
+    pet_table.bind("<Button-1>", unselect, add="+")
+
+    selected_image_path = None
+    pet_id = None
+    db_image_bytes = None
+
+    def load_pet_for_edit():
+        nonlocal selected_image_path, pet_id, db_image_bytes
+
+        selected_item = pet_table.selection()
+        if not selected_item:
+            messagebox.showwarning("No Selection", "Please choose a pet to edit.")
+            return
+
+        pet_values = pet_table.item(selected_item, "values")
+        pet_id = pet_values[0]
+
+        try:
+            conn = get_connection()
+            cursor = conn.cursor()
+
+            cursor.execute("""SELECT name, type, status, breed, age, healthIssues, description, image FROM pets
+                              WHERE id = %s""", (pet_id,))
+            pet_data = cursor.fetchone()
+            conn.close()
+
+            if not pet_data:
+                messagebox.showerror("Error", "Pet data not found.")
+                return
+
+        except mysql.connector.Error as error:
+            messagebox.showerror("Database Error", f"Error: {error}")
+            return
+
+        # Unpack DB row
+        db_name, db_type, db_status, db_breed, db_age, db_health, db_desc, db_image_bytes = pet_data
+
+        # Convert None to empty string
+        db_name = db_name or ""
+        db_type = db_type or ""
+        db_status = db_status or ""
+        db_breed = db_breed or ""
+        db_age = db_age or ""
+        db_health = db_health or ""
+        db_desc = db_desc or ""
+
+        # Populate entry fields
+        eName_entry.delete(0, "end")
+        eName_entry.insert(0, db_name)
+
+        etypes.set(db_type)  # combobox on edit frame
+        estatus.set(db_status)
+
+        ebreed_entry.delete(0, "end")
+        ebreed_entry.insert(0, db_breed)
+
+        eage_entry.delete(0, "end")
+        eage_entry.insert(0, db_age)
+
+        ehealth_entry.delete(0, "end")
+        ehealth_entry.insert(0, db_health)
+
+        edescription_text.delete("1.0", "end")
+        edescription_text.insert("1.0", db_desc)
+
+        # Load image
+        if db_image_bytes:
+            from io import BytesIO
+            img = Image.open(BytesIO(db_image_bytes))
+            img = img.resize((280, 190), Image.LANCZOS)
+            img_tk = ImageTk.PhotoImage(img)
+            eimage_label.configure(image=img_tk, text="")
+            eimage_label.image = img_tk
+            selected_image_path = None
+        else:
+            eimage_label.configure(image="", text="No Image Selected")
+            eimage_label.image = None
+            selected_image_path = None
+
+        # Lift edit frame
+        edit_pets_frame.lift()
+
+    update_btn = tk.Button(edit_pets_frame, text="Update Pet", bg="#5AB9EA",
+                           fg="white", font=("Arial", 12, "bold"), relief="flat", width=20)
+
     edit_btn = tk.Button(pagination_frame, text="Edit",
                          font=("Arial", 10, "bold"), relief="flat", width=10)
+    edit_btn.config(command=load_pet_for_edit)
     edit_btn.pack(side="right", padx=5)
 
+    #edit function
+    tk.Label(edit_pets_frame, text="Edit A Pet", bg="#F9D162", fg="#2D3436",
+             font=("Arial", 20, "bold")).place(x=30, y=80)
+
+    #image
+    eimage_label = tk.Label(edit_pets_frame, text="No Image Selected", bg="#F9D162",
+                           fg="#2D3436", font=("Arial", 12), relief="solid")
+    eimage_label.place(x=30, y=150, width=280, height=190)
+
+    def echoose_image():
+        nonlocal selected_image_path
+        file_path = filedialog.askopenfilename(title="Select Image",
+                                               filetypes=[("Image Files", "*.jpg *.png *.jpeg")])
+        if file_path:
+            selected_image_path = file_path
+            img = Image.open(file_path)
+            img = img.resize((280, 190), Image.LANCZOS)
+            img_tk = ImageTk.PhotoImage(img)
+            eimage_label.configure(image=img_tk, text="")
+            eimage_label.image = img_tk
+    # Button to choose image
+    echoose_image_btn = tk.Button(edit_pets_frame, text="Choose Image", bg="#5AB9EA",
+                                 fg="white", font=("Arial", 12, "bold"), relief="flat", width=20)
+    echoose_image_btn.config(command=echoose_image)
+    echoose_image_btn.place(x=60, y=350)
+
+    # name
+    eName = tk.Label(edit_pets_frame, text="Enter pet's name: ", bg="#F9D162", fg="#2D3436",
+                     font=("Arial", 10, "bold"))
+    eName.place(x=330, y=150)
+    eName_entry = tk.Entry(edit_pets_frame, bg="#F9FAFB", fg="#2D3436", font=("Arial", 10, "bold"))
+    eName_entry.place(x=330, y=175, width=330, height=30)
+
+    # type
+    etype_Name = tk.Label(edit_pets_frame, text="Choose animal type: ", bg="#F9D162", fg="#2D3436",
+                         font=("Arial", 10, "bold"))
+    etype_Name.place(x=330, y=210)
+    etype_options = ["Mammals", "Birds", "Reptiles", "Amphibians", "Invertebrates", "Fish"]
+    etypes = ttk.Combobox(edit_pets_frame, values=etype_options, state="normal", font=("Arial", 10, "bold"))
+    etypes.current(0)
+    etypes.place(x=330, y=235, width=150, height=30)
+
+    # status
+    estatus_Name = tk.Label(edit_pets_frame, text="Status: ", bg="#F9D162", fg="#2D3436",
+                           font=("Arial", 10, "bold"))
+    estatus_Name.place(x=500, y=210)
+    estatus_options = ["Rescued", "For Adoption"]
+    estatus = ttk.Combobox(edit_pets_frame, values=estatus_options, state="normal", font=("Arial", 10, "bold"))
+    estatus.current(0)
+    estatus.place(x=500, y=235, width=160, height=30)
+
+    # breed
+    ebreed = tk.Label(edit_pets_frame, text="Enter breed: ", bg="#F9D162", fg="#2D3436",
+                     font=("Arial", 10, "bold"))
+    ebreed.place(x=330, y=270)
+    ebreed_entry = tk.Entry(edit_pets_frame, bg="#F9FAFB", fg="#2D3436", font=("Arial", 10, "bold"))
+    ebreed_entry.place(x=330, y=295, width=330, height=30)
+
+    # age
+    eage = tk.Label(edit_pets_frame, text="Enter age: ", bg="#F9D162", fg="#2D3436",
+                   font=("Arial", 10, "bold"))
+    eage.place(x=330, y=330)
+    eage_entry = tk.Entry(edit_pets_frame, bg="#F9FAFB", fg="#2D3436", font=("Arial", 10, "bold"))
+    eage_entry.place(x=330, y=355, width=150, height=30)
+
+    # healthIssues
+    ehealth = tk.Label(edit_pets_frame, text="Enter Health Issues: ", bg="#F9D162", fg="#2D3436",
+                      font=("Arial", 10, "bold"))
+    ehealth.place(x=330, y=390)
+    ehealth_entry = tk.Entry(edit_pets_frame, bg="#F9FAFB", fg="#2D3436", font=("Arial", 10, "bold"))
+    ehealth_entry.place(x=330, y=415, width=330, height=30)
+
+    # description
+    edescription = tk.Label(edit_pets_frame, text="Enter Description: ", bg="#F9D162", fg="#2D3436",
+                           font=("Arial", 10, "bold"))
+    edescription.place(x=330, y=450)
+    edescription_text = tk.Text(edit_pets_frame, bg="#F9FAFB", fg="#2D3436", font=("Arial", 10, "bold"))
+    edescription_text.place(x=330, y=475, width=330, height=100)
+
+    # X Button
+    eclose_btn = tk.Button(edit_pets_frame, text="X", bg="#F9D162", fg="#2D3436", font=("Arial", 12, "bold"),
+                          width=3, relief="flat", command=lambda: pet_management_frame.lift())
+    eclose_btn.place(x=655, y=5)
+
+    # Update function
+    def update_pet():
+        nonlocal selected_image_path, pet_id, db_image_bytes
+
+        new_name = eName_entry.get().strip()
+        new_type = etypes.get()
+        new_status = estatus.get()
+        new_breed = ebreed_entry.get().strip()
+        new_age = eage_entry.get().strip()
+        new_health = ehealth_entry.get().strip()
+        new_desc = edescription_text.get("1.0", "end").strip()
+
+        # Image handling
+        new_image_data = None
+        if selected_image_path:
+            with open(selected_image_path, 'rb') as f:
+                new_image_data = f.read()
+        else:
+            new_image_data = db_image_bytes  # keep previous image
+
+        if not all([new_name, new_type, new_status, new_breed, new_age, new_health, new_desc]):
+            messagebox.showwarning("Incomplete Data", "Please fill all required fields")
+            return
+
+        try:
+            conn = get_connection()
+            cursor = conn.cursor()
+
+            update_query = """UPDATE pets \
+                              SET name=%s, \
+                                  type=%s, \
+                                  status=%s, \
+                                  breed=%s, \
+                                  age=%s, \
+                                  healthIssues=%s, \
+                                  description=%s, \
+                                  image=%s \
+                              WHERE id = %s """
+
+            cursor.execute(update_query, (
+                new_name, new_type, new_status, new_breed, new_age,
+                new_health, new_desc, new_image_data, pet_id
+            ))
+            conn.commit()
+            conn.close()
+
+            messagebox.showinfo("Success", "Edit successful!")
+
+            all_pets[:] = data()
+            display_page(current_page)
+
+            pet_management_frame.lift()
+
+        except mysql.connector.Error as error:
+            messagebox.showerror("Database Error", f"Error: {error}")
+
+    update_btn.config(command=update_pet)
+    update_btn.place(x=60, y=400)
+
+    edit_btn.config(command=load_pet_for_edit)
+
+    #delete
     delete_btn = tk.Button(pagination_frame, text="Delete",
                            font=("Arial", 10, "bold"), relief="flat", width=10)
     delete_btn.pack(side="right", padx=10)
