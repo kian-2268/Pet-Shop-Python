@@ -87,7 +87,6 @@ class ProductModel:
         return self.db.execute_query(query)
     
     def save_image(self, source_path):
-        """Save uploaded image to product_images directory"""
         try:
             # Generate unique filename
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
