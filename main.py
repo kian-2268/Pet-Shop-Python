@@ -13,6 +13,8 @@ from ui.panels.adoption_panel import AdoptionPanel
 from ui.panels.profile_panel import ProfilePanel
 from ui.panels.order_history_panel import OrderHistoryPanel
 from ui.panels.surrender_panel import SurrenderPanel
+import mysql.connector
+from mysql.connector import Error
 
 class MainWindow(QMainWindow):
     cart_updated = pyqtSignal()
