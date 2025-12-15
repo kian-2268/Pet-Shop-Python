@@ -43,3 +43,11 @@ class AdoptionModel:
         ORDER BY ar.request_date DESC
         """
         return self.db.execute_query(query, (customer_id,))
+    
+    def create_adoption_request(self, customer_id, pet_id, notes):
+        query = """
+        INSERT INTO adoption_requests (customer_id, pet_id, notes, status, request_date)
+        VALUES (%s, %s, %s, 'Pending', NOW())
+        """
+        result = self.db.execute_query(query, (customer_id, pet_id, notes))
+        return result is not False
