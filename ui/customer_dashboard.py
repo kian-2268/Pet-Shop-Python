@@ -21,7 +21,6 @@ class CustomerDashboard(QMainWindow):
         self.db = db
         self.user_id = user_id
         self.username = username
-
         self.init_ui()
         self.showFullScreen()
     
@@ -40,7 +39,7 @@ class CustomerDashboard(QMainWindow):
     
     def create_sidebar(self, main_layout):
         sidebar = QFrame()
-        sidebar.setFixedWidth(250) 
+        sidebar.setFixedWidth(250)
         
         # Set background image
         self.set_sidebar_background(sidebar)
@@ -49,34 +48,40 @@ class CustomerDashboard(QMainWindow):
         sidebar_layout.setContentsMargins(10, 20, 10, 20)
         sidebar_layout.setSpacing(10)
 
-        welcome_container = QWidget()
-        welcome_container.setStyleSheet("background: rgba(0, 0, 0, 0.4); border-radius: 10px;")
-        welcome_layout = QHBoxLayout(welcome_container)
-        welcome_layout.setContentsMargins(10, 10, 10, 10)
-        welcome_layout.setSpacing(10)
+        # Top bar with welcome message only
+        top_bar = QWidget()
+        top_bar.setStyleSheet("background: rgba(0, 0, 0, 0.4); border-radius: 10px;")
+        top_bar_layout = QHBoxLayout(top_bar)
+        top_bar_layout.setContentsMargins(10, 10, 10, 10)
         
-        # Add profile picture
-        profile_pic = QLabel()
+        # Welcome text
+        welcome_widget = QWidget()
+        welcome_widget.setStyleSheet("background: transparent;")
+        welcome_layout = QHBoxLayout()
+        welcome_layout.setContentsMargins(0, 0, 0, 0)
+        welcome_layout.setSpacing(8)
+
+        # Icon
+        icon_label = QLabel()
         try:
+            # Try to load an icon
             pixmap = QPixmap("system_images/p1.png")
+            if pixmap.isNull():
+                # Try alternative
+                pixmap = QPixmap("🙋🏼‍♀️")
+    
             if not pixmap.isNull():
-                # Scale
-                scaled_pixmap = pixmap.scaled(40, 40, Qt.AspectRatioMode.KeepAspectRatio, 
-                                        Qt.TransformationMode.SmoothTransformation)
-                profile_pic.setPixmap(scaled_pixmap)
-            else:
-                profile_pic.setText("👤")
-                profile_pic.setStyleSheet("font-size: 24px; color: white;")
+                pixmap = pixmap.scaled(30, 30, Qt.AspectRatioMode.KeepAspectRatio,
+                              Qt.TransformationMode.SmoothTransformation)
+                icon_label.setPixmap(pixmap)
         except:
-            profile_pic.setText("👤")
-            profile_pic.setStyleSheet("font-size: 24px; color: white;")
+            pass  # No icon if image not found
 
-        profile_pic.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        profile_pic.setFixedSize(40, 40)
+        welcome_layout.addWidget(icon_label)
 
-        # Add welcome text
-        welcome_text = QLabel(f"Welcome, {self.username}!")
-        welcome_text.setStyleSheet("""
+        # Text
+        welcome_label = QLabel(f"Welcome, {self.username}!")
+        welcome_label.setStyleSheet("""
             QLabel {
                 color: white;
                 font-size: 14px;
@@ -84,15 +89,17 @@ class CustomerDashboard(QMainWindow):
                 background: transparent;
             }
         """)
-        welcome_text.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
-        welcome_layout.addWidget(profile_pic)
-        welcome_layout.addWidget(welcome_text)
+        welcome_layout.addWidget(welcome_label)
         welcome_layout.addStretch()
-        sidebar_layout.addWidget(welcome_container)
+
+        welcome_widget.setLayout(welcome_layout)
+        top_bar_layout.addWidget(welcome_widget)
+        top_bar_layout.addStretch()
         
+        sidebar_layout.addWidget(top_bar)
         sidebar_layout.addSpacing(20)
         
-
+        # Navigation buttons
         nav_buttons = [
             (" Browse Pets", "pets", "system_images/pets.png"),
             (" Products", "products", "system_images/products.png"),
@@ -102,18 +109,18 @@ class CustomerDashboard(QMainWindow):
             (" Appointments", "appointments", "system_images/appointment.png"),
             (" Order History", "order_history", "system_images/order-history.png"),
             (" My Profile", "profile", "system_images/user.png")
-        ]   
-
+        ]
+        
         self.nav_buttons_group = []
         for text, panel_name, icon_path in nav_buttons:
             btn = QPushButton(text)
-    
+            
             # Set icon if available
             try:
                 if os.path.exists(icon_path):
                     icon = QIcon(icon_path)
                     btn.setIcon(icon)
-                    btn.setIconSize(QSize(20, 20))  # Set icon size
+                    btn.setIconSize(QSize(20, 20))
                 else:
                     # Fallback to emoji icons if image not found
                     emoji_icons = {
@@ -130,7 +137,7 @@ class CustomerDashboard(QMainWindow):
                         btn.setText(f"{emoji_icons[panel_name]}  {text}")
             except:
                 pass  # Fallback to text-only
-    
+            
             btn.setCheckable(True)
             btn.setProperty('panel', panel_name)
             btn.clicked.connect(self.switch_panel)
@@ -162,7 +169,7 @@ class CustomerDashboard(QMainWindow):
         sidebar_layout.addStretch()
         
         logout_btn = QPushButton(" Logout")
-
+        
         # Set icon using QIcon
         try:
             if os.path.exists("system_images/logout.png"):
@@ -174,7 +181,7 @@ class CustomerDashboard(QMainWindow):
                 logout_btn.setText("🚪  Logout")
         except:
             logout_btn.setText("🚪  Logout")
-
+        
         logout_btn.setStyleSheet("""
             QPushButton {
                 background: rgba(231, 76, 60, 0.8);
@@ -254,7 +261,7 @@ class CustomerDashboard(QMainWindow):
         self.stacked_panels.addWidget(self.appointments_panel)
         self.stacked_panels.addWidget(self.order_history_panel)
         self.stacked_panels.addWidget(self.profile_panel)
-    
+        
         main_layout.addWidget(self.stacked_panels, 1)
     
     def switch_panel(self):
@@ -265,7 +272,7 @@ class CustomerDashboard(QMainWindow):
             btn.setChecked(False)
         
         button.setChecked(True)
-
+        
         panel_map = {
             'pets': 0,
             'products': 1,
