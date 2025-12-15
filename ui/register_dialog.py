@@ -190,7 +190,7 @@ class RegisterDialog(QDialog):
             QMessageBox.warning(self, "Error", "Password must be at least 6 characters long")
             return
     
-        # Prepare user data - hardcode role as 'customer'
+        # Prepare user data - role as 'customer'
         user_data = (
             data['username'],
             data['password'],
@@ -199,7 +199,7 @@ class RegisterDialog(QDialog):
             data['last_name'],
             data.get('phone', ''),
             data.get('address', ''),
-            'customer'  # Hardcoded role
+            'customer' 
         )
     
         try:
