@@ -863,7 +863,7 @@ class CheckoutDialog(QDialog):
                     body {{ 
                         font-family: Arial, sans-serif; 
                         margin: 20px;
-                        font-size: 12px;
+                        font-size: 100px;
                         color: #000000;
                         line-height: 1.4;
                     }}
@@ -877,15 +877,18 @@ class CheckoutDialog(QDialog):
                     .header {{
                         text-align: center;
                         margin-bottom: 15px;
+                        font-size: 100px;
                     }}
                     .store-name {{
                         font-size: 16px;
                         font-weight: bold;
                         margin: 5px 0;
+                        font-size: 100px;
                     }}
                     .receipt-title {{
                         font-size: 14px;
                         margin: 5px 0;
+                        font-size: 100px;
                     }}
                     .order-info {{
                         text-align: right;
@@ -894,10 +897,12 @@ class CheckoutDialog(QDialog):
                     .divider {{
                         border-top: 1px solid #000;
                         margin: 10px 0;
+                        font-size: 100px;
                     }}
                     .double-divider {{
                         border-top: 2px dashed #000;
                         margin: 10px 0;
+                        font-size: 100px;
                     }}
                     .customer-info {{
                         margin: 10px 0;
@@ -908,11 +913,11 @@ class CheckoutDialog(QDialog):
                     .items-table {{
                         width: 100%;
                         border-collapse: collapse;
-                        margin: 15px 0;
+                        margin: 20px 0;
                     }}
                     .items-table th {{
                         text-align: left;
-                        padding: 5px 0;
+                        padding: 15px 0;
                         border-bottom: 1px solid #000;
                         font-weight: bold;
                     }}
@@ -922,15 +927,15 @@ class CheckoutDialog(QDialog):
                     }}
                     .price-col {{
                         text-align: right;
-                        width: 70px;
+                        width: 100px;
                     }}
                     .qty-col {{
                         text-align: center;
-                        width: 50px;
+                        width: 100px;
                     }}
                     .total-col {{
                         text-align: right;
-                        width: 70px;
+                        width: 100px;
                     }}
                     .totals {{
                         text-align: right;
@@ -941,16 +946,17 @@ class CheckoutDialog(QDialog):
                     }}
                     .grand-total {{
                         font-weight: bold;
-                        font-size: 13px;
+                        font-size: 100px;
                         margin-top: 8px;
                     }}
                     .footer {{
                         text-align: center;
                         margin-top: 20px;
-                        font-size: 11px;
+                        font-size: 100px;
                     }}
                     .contact-info {{
                         margin: 5px 0;
+                        font-size: 100px;
                     }}
                 </style>
             </head>
