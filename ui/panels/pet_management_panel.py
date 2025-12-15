@@ -2,66 +2,40 @@ from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                              QPushButton, QTableWidget, QTableWidgetItem,
                              QLineEdit, QComboBox, QTextEdit, QDoubleSpinBox,
                              QSpinBox, QFileDialog, QMessageBox, QHeaderView,
-                             QDialog, QFormLayout, QDialogButtonBox, QGroupBox)
+                             QDialog, QDialogButtonBox, QGroupBox, QScrollArea, 
+                             QGridLayout)
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QPixmap, QImage
+from PyQt6.QtGui import QPixmap
 import os
 from models.pet_model import PetModel
 
 class PetManagementPanel(QWidget):
-    def __init__(self, db, user_role):
+    def __init__(self, db, user_id):
         super().__init__()
         self.db = db
-        self.user_role = user_role
+        self.user_id = user_id
         self.pet_model = PetModel(db)
         self.current_image_path = None
         self.init_ui()
         self.load_pets()
     
     def init_ui(self):
+        self.setStyleSheet("background-color: #f9d162;")
         layout = QVBoxLayout()
         layout.setContentsMargins(20, 20, 20, 20)
         
-        # Title
+        # Header
+        header_layout = QHBoxLayout()
         title = QLabel("Pet Management")
-        title.setStyleSheet("font-size: 24px; font-weight: bold; color: #333; margin-bottom: 20px;")
-        layout.addWidget(title)
-        
-        # Controls
-        controls_layout = QHBoxLayout()
-        
-        self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText("Search pets...")
-        self.search_input.setStyleSheet("""
-            QLineEdit {
-                padding: 10px;
-                border: 2px solid #e1e1e1;
-                border-radius: 8px;
-                font-size: 14px;
-            }
-            QLineEdit:focus {
-                border-color: #667eea;
-            }
-        """)
-        self.search_input.textChanged.connect(self.search_pets)
-        
-        self.filter_combo = QComboBox()
-        self.filter_combo.addItems(["All", "Available", "Sold", "Reserved", "Adopted"])
-        self.filter_combo.setStyleSheet("""
-            QComboBox {
-                padding: 10px;
-                border: 2px solid #e1e1e1;
-                border-radius: 8px;
-                font-size: 14px;
-                min-width: 150px;
-            }
-        """)
-        self.filter_combo.currentTextChanged.connect(self.filter_pets)
+        title.setStyleSheet("background-color: #f9fafb; font-size: 25px; font-weight: bold; color: black;")
+        header_layout.addWidget(title)
+        header_layout.addSpacing(10)
+        header_layout.addStretch()
         
         add_btn = QPushButton("Add New Pet")
         add_btn.setStyleSheet("""
             QPushButton {
-                background: #28a745;
+                background: #3498db;
                 color: white;
                 padding: 10px 20px;
                 border: none;
@@ -69,19 +43,74 @@ class PetManagementPanel(QWidget):
                 font-weight: bold;
             }
             QPushButton:hover {
-                background: #218838;
+                background: #2980b9;
             }
         """)
         add_btn.clicked.connect(self.show_add_pet_dialog)
+        header_layout.addWidget(add_btn)
         
-        controls_layout.addWidget(QLabel("Search:"))
-        controls_layout.addWidget(self.search_input)
-        controls_layout.addWidget(QLabel("Status:"))
-        controls_layout.addWidget(self.filter_combo)
-        controls_layout.addStretch()
-        controls_layout.addWidget(add_btn)
+        layout.addLayout(header_layout)
+        layout.addSpacing(10)
         
-        layout.addLayout(controls_layout)
+        # Filters
+        filter_layout = QHBoxLayout()
+
+        # Label with white background
+        status_label = QLabel("Status:")
+        status_label.setStyleSheet("""
+            QLabel {    
+                background-color: #f9fafb;
+                color: black;
+                padding: 5px 10px;
+            }
+        """)
+        filter_layout.addWidget(status_label)
+
+        # Combo box
+        self.status_combo = QComboBox()
+        self.status_combo.setStyleSheet("""
+            QComboBox {
+                color: black;
+                padding: 5px;
+                background-color: white;
+            }
+            QComboBox QAbstractItemView {
+                background-color: white;
+                color: black;
+            }
+        """)
+        self.status_combo.addItems(["All", "Available", "Sold", "Reserved", "Adopted"])
+        self.status_combo.currentTextChanged.connect(self.filter_pets)
+        filter_layout.addWidget(self.status_combo)
+        
+        # Search
+        search_label = QLabel("Search:")
+        search_label.setStyleSheet("""
+            QLabel {    
+                background-color: #f9fafb;
+                color: black;
+                padding: 5px 10px;
+                margin-left: 20px;
+            }
+        """)
+        filter_layout.addWidget(search_label)
+        
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("Search by name, species, breed...")
+        self.search_input.setStyleSheet("""
+            QLineEdit {
+                color: black;
+                padding: 5px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                background-color: white;
+            }
+        """)
+        self.search_input.textChanged.connect(self.search_pets)
+        filter_layout.addWidget(self.search_input)
+
+        filter_layout.addStretch()
+        layout.addLayout(filter_layout)
         layout.addSpacing(20)
         
         # Pets table
@@ -97,17 +126,29 @@ class PetManagementPanel(QWidget):
                 border: 1px solid #e1e1e1;
                 border-radius: 8px;
                 background: white;
-                gridline-color: #e1e1e1;
+                color: black;
             }
             QHeaderView::section {
                 background: #f8f9fa;
                 padding: 10px;
                 border: none;
                 font-weight: bold;
+                color: black;
             }
         """)
         
-        self.pets_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        # Set column resize modes
+        header = self.pets_table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)  # ID
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)  # Name
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)  # Species
+        header.setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)  # Breed
+        header.setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)  # Age
+        header.setSectionResizeMode(5, QHeaderView.ResizeMode.Stretch)  # Gender
+        header.setSectionResizeMode(6, QHeaderView.ResizeMode.Stretch)  # Price
+        header.setSectionResizeMode(7, QHeaderView.ResizeMode.Stretch)  # Status
+        header.setSectionResizeMode(8, QHeaderView.ResizeMode.Stretch)  # Actions
+        
         layout.addWidget(self.pets_table)
         
         self.setLayout(layout)
@@ -123,18 +164,31 @@ class PetManagementPanel(QWidget):
             self.pets_table.setItem(row, 3, QTableWidgetItem(pet['breed'] or ''))
             self.pets_table.setItem(row, 4, QTableWidgetItem(str(pet['age'])))
             self.pets_table.setItem(row, 5, QTableWidgetItem(pet['gender']))
-            self.pets_table.setItem(row, 6, QTableWidgetItem(f"${pet['price']:.2f}"))
-            self.pets_table.setItem(row, 7, QTableWidgetItem(pet['status']))
+            self.pets_table.setItem(row, 6, QTableWidgetItem(f"₱{pet['price']:.2f}"))
+            
+            # Status with color coding
+            status_item = QTableWidgetItem(pet['status'])
+            if pet['status'] == 'Available':
+                status_item.setForeground(Qt.GlobalColor.darkGreen)
+            elif pet['status'] == 'Sold':
+                status_item.setForeground(Qt.GlobalColor.blue)
+            elif pet['status'] == 'Reserved':
+                status_item.setForeground(Qt.GlobalColor.darkYellow)
+            elif pet['status'] == 'Adopted':
+                status_item.setForeground(Qt.GlobalColor.darkMagenta)
+            self.pets_table.setItem(row, 7, status_item)
             
             # Actions
             actions_widget = QWidget()
+            actions_widget.setStyleSheet("background-color: white;")
             actions_layout = QHBoxLayout()
             actions_layout.setContentsMargins(5, 5, 5, 5)
             
             edit_btn = QPushButton("Edit")
+            edit_btn.setMinimumHeight(20)
             edit_btn.setStyleSheet("""
                 QPushButton {
-                    background: #007bff;
+                    background: #3498db;
                     color: white;
                     padding: 5px 10px;
                     border: none;
@@ -142,12 +196,13 @@ class PetManagementPanel(QWidget):
                     font-size: 12px;
                 }
                 QPushButton:hover {
-                    background: #0056b3;
+                    background: #2980b9;
                 }
             """)
             edit_btn.clicked.connect(lambda checked, p=pet: self.edit_pet(p))
             
             delete_btn = QPushButton("Delete")
+            delete_btn.setMinimumHeight(20)
             delete_btn.setStyleSheet("""
                 QPushButton {
                     background: #dc3545;
@@ -194,25 +249,112 @@ class PetManagementPanel(QWidget):
                     self.pets_table.setRowHidden(row, True)
     
     def show_add_pet_dialog(self):
-        dialog = AddEditPetDialog(self.pet_model, self.user_id if hasattr(self, 'user_id') else 1)
+        dialog = AddEditPetDialog(self.pet_model, self.user_id)
         if dialog.exec() == QDialog.DialogCode.Accepted:
             self.load_pets()
     
     def edit_pet(self, pet):
-        dialog = AddEditPetDialog(self.pet_model, self.user_id if hasattr(self, 'user_id') else 1, pet)
+        dialog = AddEditPetDialog(self.pet_model, self.user_id, pet)
         if dialog.exec() == QDialog.DialogCode.Accepted:
             self.load_pets()
     
     def delete_pet(self, pet_id):
-        reply = QMessageBox.question(self, 'Confirm Delete', 
-                                   'Are you sure you want to delete this pet?',
-                                   QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        # Question dialog
+        msg_box = QMessageBox(self)
+        msg_box.setWindowTitle("Delete Pet")
+        msg_box.setText("Are you sure you want to delete this pet?")
+        msg_box.setIcon(QMessageBox.Icon.Question)
+        msg_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        msg_box.setDefaultButton(QMessageBox.StandardButton.No)
+
+        msg_box.setStyleSheet("""
+            QMessageBox {
+                background-color: white;
+            }
+            QMessageBox QLabel {
+                color: black;
+                background-color: white;
+            }
+            QMessageBox QPushButton {
+                background-color: #5ab9ea;
+                color: white;
+                padding: 8px 15px;
+                border: none;
+                border-radius: 5px;
+                font-weight: bold;
+                min-width: 80px;
+            }
+            QMessageBox QPushButton:hover {
+                background-color: #78d1ff;
+            }
+            QMessageBox QPushButton:last-child {
+                background-color: #95a5a6;
+            }
+            QMessageBox QPushButton:last-child:hover {
+                background-color: #7f8c8d;
+            }
+        """)
+
+        reply = msg_box.exec()
+
         if reply == QMessageBox.StandardButton.Yes:
             if self.pet_model.delete_pet(pet_id):
-                QMessageBox.information(self, 'Success', 'Pet deleted successfully')
+                # Success message
+                success_msg = QMessageBox(self)
+                success_msg.setWindowTitle("Success")
+                success_msg.setText("Pet deleted successfully")
+                success_msg.setIcon(QMessageBox.Icon.Information)
+                success_msg.setStyleSheet("""
+                    QMessageBox {
+                        background-color: white;
+                    }
+                    QMessageBox QLabel {
+                        color: black;
+                        background-color: white;
+                    }
+                    QMessageBox QPushButton {
+                        background-color: #5ab9ea;
+                        color: white;
+                        padding: 8px 15px;
+                        border: none;
+                        border-radius: 5px;
+                        font-weight: bold;
+                        min-width: 80px;
+                    }
+                    QMessageBox QPushButton:hover {
+                        background-color: #78d1ff;
+                    }
+                """)
+                success_msg.exec()
                 self.load_pets()
             else:
-                QMessageBox.warning(self, 'Error', 'Failed to delete pet')
+                # Error message
+                error_msg = QMessageBox(self)
+                error_msg.setWindowTitle("Error")
+                error_msg.setText("Failed to delete pet")
+                error_msg.setIcon(QMessageBox.Icon.Warning)
+                error_msg.setStyleSheet("""
+                    QMessageBox {
+                        background-color: white;
+                    }
+                    QMessageBox QLabel {
+                        color: black;
+                        background-color: white;
+                    }
+                    QMessageBox QPushButton {
+                        background-color: #e74c3c;
+                        color: white;
+                        padding: 8px 15px;
+                        border: none;
+                        border-radius: 5px;
+                        font-weight: bold;
+                        min-width: 80px;
+                    }
+                    QMessageBox QPushButton:hover {
+                        background-color: #c0392b;
+                    }
+                """)
+                error_msg.exec()
 
 class AddEditPetDialog(QDialog):
     def __init__(self, pet_model, user_id, pet=None):
@@ -226,12 +368,59 @@ class AddEditPetDialog(QDialog):
     def init_ui(self):
         self.setWindowTitle("Add Pet" if not self.pet else "Edit Pet")
         self.setModal(True)
-        self.resize(500, 600)
+        self.resize(600, 700)
+        self.setStyleSheet("background-color: white; color: black;")
         
-        layout = QVBoxLayout()
+        # Create main layout
+        main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(20, 20, 20, 20)
+        main_layout.setSpacing(15)
+        
+        # Create scroll area for the form
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setStyleSheet("""
+            QScrollArea {
+                border: none;
+                background-color: white;
+            }
+            QScrollBar:vertical {
+                background: #f1f1f1;
+                width: 12px;
+                margin: 0px;
+            }
+            QScrollBar::handle:vertical {
+                background: #c1c1c1;
+                border-radius: 6px;
+                min-height: 20px;
+            }
+            QScrollBar::handle:vertical:hover {
+                background: #a8a8a8;
+            }
+        """)
+        
+        # Create container widget for the form
+        container_widget = QWidget()
+        container_widget.setStyleSheet("background-color: white;")
+        container_layout = QVBoxLayout()
+        container_layout.setSpacing(20)
         
         # Image upload section
         image_group = QGroupBox("Pet Image")
+        image_group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                border: 1px solid #e1e1e1;
+                border-radius: 5px;
+                margin-top: 10px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px 0 5px;
+                color: black;
+            }
+        """)
         image_layout = QVBoxLayout()
         
         self.image_label = QLabel()
@@ -240,23 +429,24 @@ class AddEditPetDialog(QDialog):
             QLabel {
                 border: 2px dashed #ccc;
                 border-radius: 10px;
-                background: #f8f9fa;
+                background: #f9fafb;
             }
         """)
         self.image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.image_label.setText("No image selected")
+        self.image_label.setText("Click 'Upload Image' to select a photo")
         
         upload_btn = QPushButton("Upload Image")
         upload_btn.setStyleSheet("""
             QPushButton {
-                background: #6c757d;
+                background: #5ab9ea;
                 color: white;
                 padding: 8px 15px;
                 border: none;
                 border-radius: 5px;
+                font-weight: bold;
             }
             QPushButton:hover {
-                background: #5a6268;
+                background: #78d1ff;
             }
         """)
         upload_btn.clicked.connect(self.upload_image)
@@ -264,74 +454,219 @@ class AddEditPetDialog(QDialog):
         image_layout.addWidget(self.image_label, 0, Qt.AlignmentFlag.AlignCenter)
         image_layout.addWidget(upload_btn, 0, Qt.AlignmentFlag.AlignCenter)
         image_group.setLayout(image_layout)
-        layout.addWidget(image_group)
+        container_layout.addWidget(image_group)
         
-        # Form
-        form_layout = QFormLayout()
-        form_layout.setSpacing(15)
+        # Basic Information Group
+        basic_group = QGroupBox("Basic Information")
+        basic_group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                border: 1px solid #e1e1e1;
+                border-radius: 5px;
+                margin-top: 10px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px 0 5px;
+                color: black;
+            }
+        """)
+        basic_layout = QGridLayout()
+        basic_layout.setHorizontalSpacing(20)
+        basic_layout.setVerticalSpacing(10)
         
+        # Row 0
+        basic_layout.addWidget(QLabel("Name *:"), 0, 0)
         self.name_input = QLineEdit()
+        self.name_input.setStyleSheet("""
+            QLineEdit {
+                padding: 8px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                background-color: #f9fafb;
+            }
+        """)
+        basic_layout.addWidget(self.name_input, 0, 1)
+        
+        basic_layout.addWidget(QLabel("Species *:"), 0, 2)
         self.species_input = QLineEdit()
+        self.species_input.setStyleSheet("""
+            QLineEdit {
+                padding: 8px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                background-color: #f9fafb;
+            }
+        """)
+        basic_layout.addWidget(self.species_input, 0, 3)
+        
+        # Row 1
+        basic_layout.addWidget(QLabel("Breed:"), 1, 0)
         self.breed_input = QLineEdit()
+        self.breed_input.setStyleSheet("""
+            QLineEdit {
+                padding: 8px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                background-color: #f9fafb;
+            }
+        """)
+        basic_layout.addWidget(self.breed_input, 1, 1)
+        
+        basic_layout.addWidget(QLabel("Age:"), 1, 2)
         self.age_input = QSpinBox()
         self.age_input.setRange(0, 50)
+        self.age_input.setStyleSheet("""
+            QSpinBox {
+                padding: 8px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                background-color: #f9fafb;
+            }
+        """)
+        basic_layout.addWidget(self.age_input, 1, 3)
         
+        # Row 2
+        basic_layout.addWidget(QLabel("Gender *:"), 2, 0)
         self.gender_combo = QComboBox()
         self.gender_combo.addItems(["Male", "Female", "Unknown"])
+        self.gender_combo.setStyleSheet("""
+            QComboBox {
+                padding: 8px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                background-color: #f9fafb;
+            }
+        """)
+        basic_layout.addWidget(self.gender_combo, 2, 1)
         
+        basic_layout.addWidget(QLabel("Price *:"), 2, 2)
         self.price_input = QDoubleSpinBox()
         self.price_input.setRange(0, 10000)
-        self.price_input.setPrefix("$ ")
+        self.price_input.setPrefix("₱ ")
         self.price_input.setDecimals(2)
+        self.price_input.setStyleSheet("""
+            QDoubleSpinBox {
+                padding: 8px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                background-color: #f9fafb;
+            }
+        """)
+        basic_layout.addWidget(self.price_input, 2, 3)
         
+        # Row 3
+        basic_layout.addWidget(QLabel("Status:"), 3, 0)
         self.status_combo = QComboBox()
         self.status_combo.addItems(["Available", "Sold", "Reserved", "Adopted"])
+        self.status_combo.setStyleSheet("""
+            QComboBox {
+                padding: 8px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                background-color: #f9fafb;
+            }
+        """)
+        basic_layout.addWidget(self.status_combo, 3, 1)
         
+        basic_group.setLayout(basic_layout)
+        container_layout.addWidget(basic_group)
+        
+        # Health Information Group
+        health_group = QGroupBox("Health Information")
+        health_group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                border: 1px solid #e1e1e1;
+                border-radius: 5px;
+                margin-top: 10px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px 0 5px;
+                color: black;
+            }
+        """)
+        health_layout = QGridLayout()
+        health_layout.setHorizontalSpacing(20)
+        health_layout.setVerticalSpacing(10)
+        
+        health_layout.addWidget(QLabel("Health Status:"), 0, 0)
         self.health_input = QLineEdit()
+        self.health_input.setPlaceholderText("e.g., Healthy, Under Treatment")
+        self.health_input.setStyleSheet("""
+            QLineEdit {
+                padding: 8px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                background-color: #f9fafb;
+            }
+        """)
+        health_layout.addWidget(self.health_input, 0, 1, 1, 3)
+        
+        health_layout.addWidget(QLabel("Vaccination:"), 1, 0)
         self.vaccination_input = QLineEdit()
+        self.vaccination_input.setPlaceholderText("e.g., Fully Vaccinated, Needs Rabies")
+        self.vaccination_input.setStyleSheet("""
+            QLineEdit {
+                padding: 8px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                background-color: #f9fafb;
+            }
+        """)
+        health_layout.addWidget(self.vaccination_input, 1, 1, 1, 3)
+        
+        health_group.setLayout(health_layout)
+        container_layout.addWidget(health_group)
+        
+        # Description Group
+        desc_group = QGroupBox("Description")
+        desc_group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                border: 1px solid #e1e1e1;
+                border-radius: 5px;
+                margin-top: 10px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px 0 5px;
+                color: black;
+            }
+        """)
+        desc_layout = QVBoxLayout()
         
         self.description_input = QTextEdit()
-        self.description_input.setMaximumHeight(100)
-        
-        # Style inputs
-        for widget in [self.name_input, self.species_input, self.breed_input, 
-                      self.health_input, self.vaccination_input]:
-            widget.setStyleSheet("""
-                QLineEdit {
-                    padding: 8px;
-                    border: 1px solid #ddd;
-                    border-radius: 5px;
-                }
-            """)
-        
+        self.description_input.setPlaceholderText("Enter pet description, personality, special needs...")
+        self.description_input.setMaximumHeight(150)
         self.description_input.setStyleSheet("""
             QTextEdit {
                 padding: 8px;
                 border: 1px solid #ddd;
                 border-radius: 5px;
+                background-color: #f9fafb;
             }
         """)
+        desc_layout.addWidget(self.description_input)
         
-        form_layout.addRow("Name *:", self.name_input)
-        form_layout.addRow("Species *:", self.species_input)
-        form_layout.addRow("Breed:", self.breed_input)
-        form_layout.addRow("Age:", self.age_input)
-        form_layout.addRow("Gender *:", self.gender_combo)
-        form_layout.addRow("Price *:", self.price_input)
-        form_layout.addRow("Status:", self.status_combo)
-        form_layout.addRow("Health Status:", self.health_input)
-        form_layout.addRow("Vaccination:", self.vaccination_input)
-        form_layout.addRow("Description:", self.description_input)
+        desc_group.setLayout(desc_layout)
+        container_layout.addWidget(desc_group)
         
-        layout.addLayout(form_layout)
+        container_widget.setLayout(container_layout)
+        scroll_area.setWidget(container_widget)
+        main_layout.addWidget(scroll_area)
         
         # Buttons
         button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         button_box.accepted.connect(self.save_pet)
         button_box.rejected.connect(self.reject)
+        main_layout.addWidget(button_box)
         
-        layout.addWidget(button_box)
-        self.setLayout(layout)
+        self.setLayout(main_layout)
         
         # Load pet data if editing
         if self.pet:
@@ -350,7 +685,7 @@ class AddEditPetDialog(QDialog):
         self.description_input.setText(self.pet['description'] or '')
         
         # Load image if exists
-        if self.pet['image_path'] and os.path.exists(self.pet['image_path']):
+        if self.pet.get('image_path') and os.path.exists(self.pet['image_path']):
             self.display_image(self.pet['image_path'])
     
     def upload_image(self):
@@ -404,7 +739,7 @@ class AddEditPetDialog(QDialog):
                 else:
                     QMessageBox.warning(self, "Error", "Failed to update pet")
             else:
-                # Add new pet
+                # Add new pet - FIXED: Added created_by parameter
                 if self.pet_model.add_pet(pet_data, self.user_id):
                     QMessageBox.information(self, "Success", "Pet added successfully")
                     self.accept()
