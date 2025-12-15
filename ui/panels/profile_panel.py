@@ -1,7 +1,8 @@
-from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
-                             QPushButton, QLineEdit, QMessageBox, QGroupBox,
-                             QFormLayout, QTextEdit)
-from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import (
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
+    QLineEdit, QMessageBox, QGroupBox, QFormLayout, QTextEdit
+)
+from PyQt6.QtCore import QTimer
 from models.user_model import UserModel
 
 class ProfilePanel(QWidget):
@@ -11,94 +12,74 @@ class ProfilePanel(QWidget):
         self.user_id = user_id
         self.user_model = UserModel(db)
         self.init_ui()
-        self.load_user_data()
+        QTimer.singleShot(0, self.load_user_data)
     
     def init_ui(self):
+        self.setStyleSheet("background-color: white; color; black")
         layout = QVBoxLayout()
         layout.setContentsMargins(20, 20, 20, 20)
         
         # Title
         title = QLabel("My Profile")
-        title.setStyleSheet("font-size: 24px; font-weight: bold; color: #333; margin-bottom: 20px;")
+        title.setStyleSheet("""
+            background-color: #f9fafb;
+            font-size: 25px;
+            font-weight: bold;
+            color: black;
+        """)
         layout.addWidget(title)
         
-        # Profile form
-        form_group = QGroupBox("Personal Information")
-        form_layout = QFormLayout()
-        form_layout.setSpacing(15)
+        # Personal information group
+        personal_group = QGroupBox("Personal Information")
+        personal_group.setStyleSheet(self.get_groupbox_style())
         
-        self.first_name_input = QLineEdit()
-        self.last_name_input = QLineEdit()
-        self.email_input = QLineEdit()
-        self.phone_input = QLineEdit()
-        self.address_input = QTextEdit()
-        self.address_input.setMaximumHeight(80)
+        personal_layout = QFormLayout()
+        personal_layout.setSpacing(15)
         
-        # Style inputs
-        for widget in [self.first_name_input, self.last_name_input, self.email_input, self.phone_input]:
-            widget.setStyleSheet("""
-                QLineEdit {
-                    padding: 10px;
-                    border: 2px solid #e1e1e1;
-                    border-radius: 8px;
-                    font-size: 14px;
-                }
-                QLineEdit:focus {
-                    border-color: #3498db;
-                }
-            """)
+        # Create styled labels for form
+        first_name_label = self.create_form_label("First Name *:")
+        last_name_label = self.create_form_label("Last Name *:")
+        email_label = self.create_form_label("Email *:")
+        phone_label = self.create_form_label("Phone:")
+        address_label = self.create_form_label("Address:")
         
-        self.address_input.setStyleSheet("""
-            QTextEdit {
-                padding: 10px;
-                border: 2px solid #e1e1e1;
-                border-radius: 8px;
-                font-size: 14px;
-            }
-            QTextEdit:focus {
-                border-color: #3498db;
-            }
-        """)
+        # Create input fields
+        self.first_name_input = self.create_line_edit()
+        self.last_name_input = self.create_line_edit()
+        self.email_input = self.create_line_edit()
+        self.phone_input = self.create_line_edit()
+        self.address_input = self.create_text_edit()
+
+        # Add fields to layout with styled labels
+        personal_layout.addRow(first_name_label, self.first_name_input)
+        personal_layout.addRow(last_name_label, self.last_name_input)
+        personal_layout.addRow(email_label, self.email_input)
+        personal_layout.addRow(phone_label, self.phone_input)
+        personal_layout.addRow(address_label, self.address_input)
         
-        form_layout.addRow("First Name *:", self.first_name_input)
-        form_layout.addRow("Last Name *:", self.last_name_input)
-        form_layout.addRow("Email *:", self.email_input)
-        form_layout.addRow("Phone:", self.phone_input)
-        form_layout.addRow("Address:", self.address_input)
+        personal_group.setLayout(personal_layout)
+        layout.addWidget(personal_group)
         
-        form_group.setLayout(form_layout)
-        layout.addWidget(form_group)
-        
-        # Password change section
+        # Password change group
         password_group = QGroupBox("Change Password")
+        password_group.setStyleSheet(self.get_groupbox_style())
+        
         password_layout = QFormLayout()
         password_layout.setSpacing(15)
         
-        self.current_password_input = QLineEdit()
-        self.current_password_input.setEchoMode(QLineEdit.EchoMode.Password)
+        # Create styled labels for password form
+        current_password_label = self.create_form_label("Current Password:")
+        new_password_label = self.create_form_label("New Password:")
+        confirm_password_label = self.create_form_label("Confirm Password:")
         
-        self.new_password_input = QLineEdit()
-        self.new_password_input.setEchoMode(QLineEdit.EchoMode.Password)
-        
-        self.confirm_password_input = QLineEdit()
-        self.confirm_password_input.setEchoMode(QLineEdit.EchoMode.Password)
-        
-        for widget in [self.current_password_input, self.new_password_input, self.confirm_password_input]:
-            widget.setStyleSheet("""
-                QLineEdit {
-                    padding: 10px;
-                    border: 2px solid #e1e1e1;
-                    border-radius: 8px;
-                    font-size: 14px;
-                }
-                QLineEdit:focus {
-                    border-color: #3498db;
-                }
-            """)
-        
-        password_layout.addRow("Current Password:", self.current_password_input)
-        password_layout.addRow("New Password:", self.new_password_input)
-        password_layout.addRow("Confirm New Password:", self.confirm_password_input)
+        # Create password fields
+        self.current_password_input = self.create_password_edit()
+        self.new_password_input = self.create_password_edit()
+        self.confirm_password_input = self.create_password_edit()
+
+        password_layout.addRow(current_password_label, self.current_password_input)
+        password_layout.addRow(new_password_label, self.new_password_input)
+        password_layout.addRow(confirm_password_label, self.confirm_password_input)
         
         password_group.setLayout(password_layout)
         layout.addWidget(password_group)
@@ -106,38 +87,10 @@ class ProfilePanel(QWidget):
         # Buttons
         buttons_layout = QHBoxLayout()
         
-        save_profile_btn = QPushButton("Save Profile")
-        save_profile_btn.setStyleSheet("""
-            QPushButton {
-                background: #3498db;
-                color: white;
-                padding: 12px 25px;
-                border: none;
-                border-radius: 8px;
-                font-weight: bold;
-                font-size: 14px;
-            }
-            QPushButton:hover {
-                background: #2980b9;
-            }
-        """)
+        save_profile_btn = self.create_button("Save Profile", "#5ab9ea", "#78d1ff")
         save_profile_btn.clicked.connect(self.save_profile)
         
-        change_password_btn = QPushButton("Change Password")
-        change_password_btn.setStyleSheet("""
-            QPushButton {
-                background: #27ae60;
-                color: white;
-                padding: 12px 25px;
-                border: none;
-                border-radius: 8px;
-                font-weight: bold;
-                font-size: 14px;
-            }
-            QPushButton:hover {
-                background: #219a52;
-            }
-        """)
+        change_password_btn = self.create_button("Change Password", "#e67e22", "#e67e22")
         change_password_btn.clicked.connect(self.change_password)
         
         buttons_layout.addWidget(save_profile_btn)
@@ -146,62 +99,229 @@ class ProfilePanel(QWidget):
         
         layout.addLayout(buttons_layout)
         self.setLayout(layout)
+
+    def create_form_label(self, text):
+        # Create a form label with black text
+        label = QLabel(text)
+        label.setStyleSheet("color: black; font-size: 14px;")
+        return label
+    
+    def show_styled_message(self, title, message, icon_type=QMessageBox.Icon.Information):
+        # Show a styled message box with white background and black text
+        msg_box = QMessageBox(self)
+        msg_box.setWindowTitle(title)
+        msg_box.setText(message)
+        msg_box.setIcon(icon_type)
+    
+        # Apply styles
+        msg_box.setStyleSheet("""
+            QMessageBox {
+                background-color: white;
+            }
+            QMessageBox QLabel {
+                color: black;
+                background-color: white;
+            }
+            QMessageBox QPushButton {
+                background-color: #5ab9ea;
+                color: white;
+                padding: 8px 15px;
+                border: none;
+                border-radius: 5px;
+                font-weight: bold;
+                min-width: 80px;
+            }
+            QMessageBox QPushButton:hover {
+                background-color: #78d1ff;
+            }
+        """)
+    
+        return msg_box.exec()
+    
+    def get_groupbox_style(self):
+        return """
+            QGroupBox {
+                font-weight: bold;
+                border: 1px solid #e1e1e1;
+                border-radius: 8px;
+                margin-top: 10px;
+                background: white;
+                color: black;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px 0 5px;
+                background-color: #f9fafb;
+                color: black;
+            }
+        """
+    
+    def create_line_edit(self):
+        line_edit = QLineEdit()
+        line_edit.setStyleSheet("""
+            QLineEdit {
+                padding: 10px;
+                border: 2px solid #e1e1e1;
+                border-radius: 8px;
+                font-size: 14px;
+                color: black;
+            }
+            QLineEdit:focus {
+                border-color: #3498db;
+            }
+        """)
+        return line_edit
+    
+    def create_text_edit(self):
+        text_edit = QTextEdit()
+        text_edit.setMaximumHeight(80)
+        text_edit.setStyleSheet("""
+            QTextEdit {
+                padding: 10px;
+                border: 2px solid #e1e1e1;
+                border-radius: 8px;
+                font-size: 14px;
+                color: black;
+                background-color: white;
+            }
+            QTextEdit:focus {
+                border-color: #3498db;
+            }
+        """)
+        return text_edit
+    
+    def create_password_edit(self):
+        password_edit = QLineEdit()
+        password_edit.setEchoMode(QLineEdit.EchoMode.Password)
+        password_edit.setStyleSheet("""
+            QLineEdit {
+                padding: 10px;
+                border: 2px solid #e1e1e1;
+                border-radius: 8px;
+                font-size: 14px;
+                color: black;
+            }
+            QLineEdit:focus {
+                border-color: #3498db;
+            }
+        """)
+        return password_edit
+    
+    def create_button(self, text, color, hover_color):
+        button = QPushButton(text)
+        button.setStyleSheet(f"""
+            QPushButton {{
+                background: {color};
+                color: white;
+                padding: 12px 25px;
+                border: none;
+                border-radius: 5px;
+                font-weight: bold;
+                font-size: 14px;
+                min-width: 150px;
+            }}
+            QPushButton:hover {{
+                background: {hover_color};
+            }}
+        """)
+        return button
     
     def load_user_data(self):
-        user = self.user_model.get_user_by_id(self.user_id)
-        if user:
-            self.first_name_input.setText(user['first_name'])
-            self.last_name_input.setText(user['last_name'])
-            self.email_input.setText(user['email'])
-            self.phone_input.setText(user['phone'] or '')
-            self.address_input.setText(user['address'] or '')
-    
+        try:
+            user = self.user_model.get_user_by_id(self.user_id)
+            if user:
+                self.first_name_input.setText(user.get('first_name', ''))
+                self.last_name_input.setText(user.get('last_name', ''))
+                self.email_input.setText(user.get('email', ''))
+                self.phone_input.setText(user.get('phone', ''))
+                self.address_input.setText(user.get('address', ''))
+        except Exception as e:
+            self.show_styled_message("Error", f"Failed to load user data: {str(e)}", QMessageBox.Icon.Critical)
+
     def save_profile(self):
+        # Save profile information
+        # Get data from input fields
         first_name = self.first_name_input.text().strip()
         last_name = self.last_name_input.text().strip()
         email = self.email_input.text().strip()
         phone = self.phone_input.text().strip()
         address = self.address_input.toPlainText().strip()
         
-        # Validation
-        if not first_name or not last_name or not email:
-            QMessageBox.warning(self, "Error", "Please fill in all required fields")
+        # Basic validation
+        if not first_name or not last_name:
+            self.show_styled_message("Validation Error", "First name and last name are required!", 
+                         QMessageBox.Icon.Warning)
             return
         
-        user_data = (email, first_name, last_name, phone, address, self.user_id)
+        if not email:
+            self.show_styled_message("Validation Error", "Email is required!", QMessageBox.Icon.Warning)
+            return
         
-        if self.user_model.update_user(self.user_id, user_data):
-            QMessageBox.information(self, "Success", "Profile updated successfully")
-        else:
-            QMessageBox.warning(self, "Error", "Failed to update profile")
+        # Prepare update data
+        update_data = {
+            'first_name': first_name,
+            'last_name': last_name,
+            'email': email,
+            'phone': phone,
+            'address': address
+        }
+        
+        try:
+            success = self.user_model.update_user(self.user_id, update_data)
+            
+            if success:
+                self.show_styled_message("Success", "Profile updated successfully!")
+            else:
+                self.show_styled_message("Error", "Failed to update profile!", QMessageBox.Icon.Warning)
+                    
+        except Exception as e:
+            self.show_styled_message("Error", 
+                               f"An error occurred: {str(e)}", QMessageBox.Icon.Critical)
     
     def change_password(self):
+        """Change user password"""
         current_password = self.current_password_input.text().strip()
         new_password = self.new_password_input.text().strip()
         confirm_password = self.confirm_password_input.text().strip()
         
+        # Validation
         if not current_password or not new_password or not confirm_password:
-            QMessageBox.warning(self, "Error", "Please fill in all password fields")
+            self.show_styled_message("Error", "Please fill in all password fields", QMessageBox.Icon.Warning)
             return
         
         if new_password != confirm_password:
-            QMessageBox.warning(self, "Error", "New passwords do not match")
+            self.show_styled_message("Error", "New passwords do not match", QMessageBox.Icon.Warning)
             return
         
         if len(new_password) < 6:
-            QMessageBox.warning(self, "Error", "New password must be at least 6 characters long")
+            self.show_styled_message("Error", "Password must be at least 6 characters long", QMessageBox.Icon.Warning)
             return
         
-        # Verify current password
-        user = self.user_model.get_user_by_id(self.user_id)
-        # In a real application, you would verify the current password hash
-        
-        # Update password
-        query = "UPDATE users SET password = %s WHERE id = %s"
-        if self.db.execute_query(query, (new_password, self.user_id)):
-            QMessageBox.information(self, "Success", "Password changed successfully")
-            self.current_password_input.clear()
-            self.new_password_input.clear()
-            self.confirm_password_input.clear()
-        else:
-            QMessageBox.warning(self, "Error", "Failed to change password")
+        try:
+            # Verify current password
+            user = self.user_model.get_user_by_id(self.user_id)
+            
+            if not user or user.get('password') != current_password:
+                self.show_styled_message("Error", "Current password is incorrect", QMessageBox.Icon.Warning)
+                return
+            
+            # Update password
+            if self.user_model.update_password(self.user_id, new_password):
+                if hasattr(self.user_model, 'close'):
+                    self.user_model.close()
+                self.user_model = UserModel(self.db)
+                self.show_styled_message("Success", 
+                                      "Password changed successfully!")
+                
+                # Clear password fields
+                self.current_password_input.clear()
+                self.new_password_input.clear()
+                self.confirm_password_input.clear()
+            else:
+                self.show_styled_message("Error", 
+                                   "Failed to update password in database!", QMessageBox.Icon.Critical)
+                
+        except Exception as e:
+            self.show_styled_message("Error", 
+                               f"Failed to change password: {str(e)}", QMessageBox.Icon.Critical)
