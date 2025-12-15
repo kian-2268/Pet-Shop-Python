@@ -29,7 +29,7 @@ class CustomerPetsPanel(QWidget):
         # Header
         header_layout = QHBoxLayout()
         title = QLabel("Available Pets")
-        title.setStyleSheet("background-color: #f9fafb; font-size: 40px; font-weight: bold; color: black;")
+        title.setStyleSheet("background-color: #f9fafb; font-size: 25px; font-weight: bold; color: black;")
         header_layout.addWidget(title)
         
         header_layout.addStretch()
@@ -349,18 +349,125 @@ class CustomerPetsPanel(QWidget):
     
     def request_adoption(self, pet):
         dialog = AdoptionRequestDialog(self.adoption_model, self.user_id, pet)
-        if dialog.exec() == QDialog.DialogCode.Accepted:
-            QMessageBox.information(self, "Success", "Adoption request submitted successfully!")
+        dialog.exec()
     
     def add_to_cart(self, pet):
         try:
             result = self.cart_model.add_to_cart(self.user_id, 'pet', pet['id'], 1)
             if result:
-                QMessageBox.information(self, "Success", f"{pet['name']} added to cart!")
+                # Create styled message box
+                msg_box = QMessageBox(self)
+                msg_box.setWindowTitle("Success")
+                msg_box.setText(f"{pet['name']} added to cart!")
+                msg_box.setIcon(QMessageBox.Icon.Information)
+                msg_box.setStyleSheet("""
+                    QMessageBox {
+                        background-color: white;
+                    }
+                    QMessageBox QLabel {
+                        color: black;
+                        background-color: white;
+                    }
+                    QPushButton {
+                        background: #5ab9ea;
+                        color: white;
+                        padding: 8px 15px;
+                        border: none;
+                        border-radius: 5px;
+                        font-weight: bold;
+                    }
+                    QMessageBox QPushButton:hover {
+                        background-color: #78d1ff;
+                    }
+                """)
+                msg_box.exec()
+                
+                # Refresh the cart panel
+                self.refresh_cart_panel()
             else:
-                QMessageBox.warning(self, "Error", "Failed to add pet to cart")
+                msg_box = QMessageBox(self)
+                msg_box.setWindowTitle("Error")
+                msg_box.setText("Failed to add pet to cart")
+                msg_box.setIcon(QMessageBox.Icon.Warning)
+                msg_box.setStyleSheet("""
+                    QMessageBox {
+                        background-color: white;
+                    }
+                    QMessageBox QLabel {
+                        color: black;
+                        background-color: white;
+                    }
+                    QMessageBox QPushButton {
+                        background-color: #e74c3c;
+                        color: white;
+                        padding: 8px 15px;
+                        border: none;
+                        border-radius: 5px;
+                        font-weight: bold;
+                        min-width: 80px;
+                    }
+                    QMessageBox QPushButton:hover {
+                        background-color: #c0392b;
+                    }
+                """)
+                msg_box.exec()
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
+            msg_box = QMessageBox(self)
+            msg_box.setWindowTitle("Error")
+            msg_box.setText(f"An error occurred: {str(e)}")
+            msg_box.setIcon(QMessageBox.Icon.Critical)
+            msg_box.setStyleSheet("""
+                QMessageBox {
+                    background-color: white;
+                }
+                QMessageBox QLabel {
+                    color: black;
+                    background-color: white;
+                }
+                QMessageBox QPushButton {
+                        background-color: #e74c3c;
+                        color: white;
+                        padding: 8px 15px;
+                        border: none;
+                        border-radius: 5px;
+                        font-weight: bold;
+                        min-width: 80px;
+                    }
+                    QMessageBox QPushButton:hover {
+                        background-color: #c0392b;
+                    }
+            """)
+            msg_box.exec()
+    
+    def refresh_cart_panel(self):
+        """Find and refresh the cart panel - same as in CustomerProductsPanel"""
+        # Method 1: If CustomerDashboard has a direct reference to cart_panel
+        parent = self.parent()
+        while parent:
+            if hasattr(parent, 'cart_panel'):
+                parent.cart_panel.refresh_cart()
+                return True
+            parent = parent.parent()
+        
+        # Method 2: If using tab widget
+        parent = self.parent()
+        while parent:
+            if hasattr(parent, 'tab_widget'):
+                for i in range(parent.tab_widget.count()):
+                    widget = parent.tab_widget.widget(i)
+                    if hasattr(widget, 'refresh_cart'):
+                        widget.refresh_cart()
+                        return True
+            parent = parent.parent()
+        
+        # Method 3: Search through all windows
+        from PyQt6.QtWidgets import QApplication
+        for widget in QApplication.topLevelWidgets():
+            if hasattr(widget, 'cart_panel'):
+                widget.cart_panel.refresh_cart()
+                return True
+        
+        return False
 
 class AdoptionRequestDialog(QDialog):
     def __init__(self, adoption_model, customer_id, pet):
@@ -416,38 +523,71 @@ class AdoptionRequestDialog(QDialog):
         
         layout.addWidget(button_box)
         self.setLayout(layout)
-
-    def show_styled_message(self, title, message, icon_type):
-        msg_box = QMessageBox(self)
-        msg_box.setWindowTitle(title)
-        msg_box.setText(message)
-        msg_box.setIcon(icon_type)
-        msg_box.setStyleSheet("""
-            QMessageBox {
-                background-color: white;
-                color: black;
-            }
-            QLabel {
-                color: black;
-            }
-            QPushButton {
-                background-color: #f0f0f0;
-                color: black;
-                border: 1px solid #aaa;
-                padding: 5px 15px;
-                min-width: 80px;
-            }
-            QPushButton:hover {
-                background-color: #e0e0e0;
-            }
-        """)
-        return msg_box.exec_()
     
     def submit_adoption(self):
         notes = self.notes_input.toPlainText().strip()
     
-        if self.adoption_model.create_adoption_request(self.customer_id, self.pet['id'], notes):
-            self.show_styled_message("Success", "Adoption request submitted for review!", QMessageBox.Information)
+        # Create adoption request
+        result = self.adoption_model.create_adoption_request(self.customer_id, self.pet['id'], notes)
+        
+        if result:
+            # Success message
+            msg_box = QMessageBox(self)
+            msg_box.setWindowTitle("Adoption Request Submitted")
+            msg_box.setText("Your adoption request has been submitted for review!")
+            msg_box.setIcon(QMessageBox.Icon.Information)
+            msg_box.setStyleSheet("""
+                QMessageBox {
+                    background-color: white;
+                    color: white;
+                }
+                QMessageBox QLabel {
+                    color: black;
+                    background-color: white;
+                }
+                QMessageBox QPushButton {
+                    background-color: #e67e22;
+                    color: white;
+                    padding: 8px 15px;
+                    border: none;
+                    border-radius: 5px;
+                    font-weight: bold;
+                    min-width: 80px;
+                }
+                QMessageBox QPushButton:hover {
+                    background-color: #f9d162;
+                }
+            """)
+        
+            msg_box.exec()
             self.accept()
         else:
-            self.show_styled_message("Error", "Failed to submit adoption request", QMessageBox.Warning)
+            # Error message
+            msg_box = QMessageBox(self)
+            msg_box.setWindowTitle("Adoption Failed")
+            msg_box.setText("Failed to submit your adoption request")
+            msg_box.setIcon(QMessageBox.Icon.Warning)
+            msg_box.setStyleSheet("""
+                QMessageBox {
+                    background-color: white;
+                    color: black;
+                }
+                QMessageBox QLabel {
+                    color: black;
+                    background-color: white;
+                }
+                QMessageBox QPushButton {
+                    background-color: #e74c3c;
+                    color: white;
+                    padding: 8px 15px;
+                    border: none;
+                    border-radius: 5px;
+                    font-weight: bold;
+                    min-width: 80px;
+                }
+                QMessageBox QPushButton:hover {
+                    background-color: #c0392b;
+                }
+            """)
+        
+            msg_box.exec()
