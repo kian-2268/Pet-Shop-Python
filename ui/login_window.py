@@ -1,6 +1,6 @@
 import os
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, 
-                             QPushButton, QFrame, QMessageBox, QCheckBox, QGraphicsDropShadowEffect)
+                             QPushButton, QFrame, QMessageBox, QGraphicsDropShadowEffect)
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QFont, QPixmap, QFontDatabase, QColor
 from models.user_model import UserModel
@@ -103,6 +103,7 @@ class LoginWindow(QWidget):
                 border: 2px solid #3498db;
             }
         """)
+        
         frame_layout.addWidget(self.username_input)
         
         # Password
@@ -153,12 +154,8 @@ class LoginWindow(QWidget):
         password_layout.addWidget(self.show_password_btn)
         frame_layout.addLayout(password_layout)
         
-        # Remember me (add remember me token in db)
+        # Forgot password button
         extra_layout = QHBoxLayout()
-        
-        self.remember_me = QCheckBox("Remember me")
-        self.remember_me.setStyleSheet("color: #666; font-size: 13px;")
-        extra_layout.addWidget(self.remember_me)
         extra_layout.addStretch()
         
         self.forgot_password_btn = QPushButton("Forgot Password?")
@@ -245,21 +242,21 @@ class LoginWindow(QWidget):
     def handle_login(self):
         username = self.username_input.text().strip()
         password = self.password_input.text().strip()
-    
+
         if not username or not password:
             QMessageBox.warning(self, "Error", "Please enter both username and password")
             return
-    
+
         # Show loading state
         self.login_btn.setText("Logging in...")
         self.login_btn.setEnabled(False)
-    
-        # Authenticate with plain text password
+
+        # Authenticate password
         user = self.user_model.authenticate(username, password)
-    
+
         if user:
             # Emit the signal with user data
-            self.login_successful.emit((user['user_id'], user['username'], user['role']))
+            self.login_successful.emit((user['id'], user['username'], user['role']))
         else:
             QMessageBox.warning(self, "Error", "Invalid username or password")
             # Reset button state
@@ -277,7 +274,6 @@ class LoginWindow(QWidget):
         self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
         self.show_password_btn.setChecked(False)
         self.show_password_btn.setText("Show")
-        self.remember_me.setChecked(False)
         self.login_btn.setText("Login")
         self.login_btn.setEnabled(True)
         self.username_input.setFocus()
