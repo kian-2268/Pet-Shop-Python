@@ -15,15 +15,24 @@ class AttendancePanel(QWidget):
         self.load_attendance()
     
     def init_ui(self):
+        self.setStyleSheet("background-color: white; color: black;")
+        
         layout = QVBoxLayout()
         layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(15)
         
         # Header
-        header_layout = QHBoxLayout()
+        header_widget = QWidget()
+        header_layout = QHBoxLayout(header_widget)
         title = QLabel("Attendance Tracking")
-        title.setStyleSheet("font-size: 24px; font-weight: bold; color: #333;")
+        title.setStyleSheet("""
+            background-color: white;
+            font-size: 25px; 
+            font-weight: bold; 
+            color: black;
+            padding: 10px 0;
+        """)
         header_layout.addWidget(title)
-        
         header_layout.addStretch()
         
         # Check-in/out buttons
@@ -36,6 +45,7 @@ class AttendancePanel(QWidget):
                 border: none;
                 border-radius: 8px;
                 font-weight: bold;
+                min-width: 100px;
             }
             QPushButton:hover {
                 background: #219a52;
@@ -52,6 +62,7 @@ class AttendancePanel(QWidget):
                 border: none;
                 border-radius: 8px;
                 font-weight: bold;
+                min-width: 100px;
             }
             QPushButton:hover {
                 background: #c0392b;
@@ -61,12 +72,31 @@ class AttendancePanel(QWidget):
         
         header_layout.addWidget(self.checkin_btn)
         header_layout.addWidget(self.checkout_btn)
-        layout.addLayout(header_layout)
-        layout.addSpacing(20)
+        
+        layout.addWidget(header_widget)
+        layout.addSpacing(10)
         
         # Today's status
         today_group = QGroupBox("Today's Status")
-        today_layout = QHBoxLayout()
+        today_group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                border: 2px solid #e1e1e1;
+                border-radius: 8px;
+                margin-top: 10px;
+                padding-top: 10px;
+                background-color: white;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px 0 5px;
+                color: black;
+            }
+        """)
+        
+        today_widget = QWidget()
+        today_layout = QHBoxLayout(today_widget)
         
         self.status_label = QLabel("Not checked in today")
         self.status_label.setStyleSheet("font-size: 16px; font-weight: bold; color: #e74c3c;")
@@ -75,23 +105,68 @@ class AttendancePanel(QWidget):
         today_layout.addStretch()
         today_group.setLayout(today_layout)
         layout.addWidget(today_group)
-        layout.addSpacing(20)
+        layout.addSpacing(10)
         
         # Attendance history
         history_group = QGroupBox("Attendance History")
+        history_group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                font-size: 16px;
+                border: 2px solid #e1e1e1;
+                border-radius: 8px;
+                margin-top: 10px;
+                padding-top: 10px;
+                background-color: white;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px 0 5px;
+                color: black;
+            }
+        """)
+        
         history_layout = QVBoxLayout()
         
         # Date filter
-        filter_layout = QHBoxLayout()
-        filter_layout.addWidget(QLabel("Month:"))
+        filter_widget = QWidget()
+        filter_layout = QHBoxLayout(filter_widget)
+        filter_label = QLabel("Month:")
+        filter_label.setStyleSheet("""
+            QLabel {    
+                background-color: white;
+                color: black;
+                padding: 5px 10px;
+            }
+        """)
+        filter_layout.addWidget(filter_label)
+        
         self.month_combo = QDateEdit()
         self.month_combo.setDate(QDateTime.currentDateTime().date())
         self.month_combo.setDisplayFormat("MMMM yyyy")
         self.month_combo.setCalendarPopup(True)
+        self.month_combo.setStyleSheet("""
+            QDateEdit {
+                color: black;
+                padding: 5px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                background-color: white;
+            }
+            QDateEdit::drop-down {
+                subcontrol-origin: padding;
+                subcontrol-position: top right;
+                width: 20px;
+                border-left-width: 1px;
+                border-left-color: #ddd;
+                border-left-style: solid;
+            }
+        """)
         self.month_combo.dateChanged.connect(self.load_attendance)
         filter_layout.addWidget(self.month_combo)
         filter_layout.addStretch()
-        history_layout.addLayout(filter_layout)
+        history_layout.addWidget(filter_widget)
         
         # Attendance table
         self.attendance_table = QTableWidget()
@@ -105,12 +180,14 @@ class AttendancePanel(QWidget):
                 border: 1px solid #e1e1e1;
                 border-radius: 8px;
                 background: white;
+                color: black;
             }
             QHeaderView::section {
                 background: #f8f9fa;
                 padding: 10px;
                 border: none;
                 font-weight: bold;
+                color: black;
             }
         """)
         
@@ -145,74 +222,119 @@ class AttendancePanel(QWidget):
     
     def check_in(self):
         if self.attendance_model.check_in(self.user_id):
-            QMessageBox.information(self, "Success", "Checked in successfully!")
+            msg = QMessageBox(self)
+            msg.setWindowTitle("Success")
+            msg.setText("Checked in successfully!")
+            msg.setIcon(QMessageBox.Icon.Information)
+            msg.setStyleSheet("""
+                QMessageBox {
+                    background-color: white;
+                }
+                QMessageBox QLabel {
+                    color: black;
+                    background-color: white;
+                }
+                QMessageBox QPushButton {
+                    background-color: #5ab9ea;
+                    color: white;
+                    padding: 8px 15px;
+                    border: none;
+                    border-radius: 5px;
+                    font-weight: bold;
+                    min-width: 80px;
+                }
+                QMessageBox QPushButton:hover {
+                    background-color: #78d1ff;
+                }
+            """)
+            msg.exec()
             self.update_today_status()
             self.load_attendance()
         else:
-            QMessageBox.warning(self, "Error", "Failed to check in")
+            msg = QMessageBox(self)
+            msg.setWindowTitle("Error")
+            msg.setText("Failed to check in")
+            msg.setIcon(QMessageBox.Icon.Warning)
+            msg.setStyleSheet("""
+                QMessageBox {
+                    background-color: white;
+                }
+                QMessageBox QLabel {
+                    color: black;
+                    background-color: white;
+                }
+                QMessageBox QPushButton {
+                    background-color: #e74c3c;
+                    color: white;
+                    padding: 8px 15px;
+                    border: none;
+                    border-radius: 5px;
+                    font-weight: bold;
+                    min-width: 80px;
+                }
+                QMessageBox QPushButton:hover {
+                    background-color: #c0392b;
+                }
+            """)
+            msg.exec()
     
-    def check_out(self, user_id):
-        try:
-            today = datetime.now().date()
-            current_time = datetime.now()
-        
-            print(f"=== CHECK-OUT DEBUG ===")
-            print(f"User ID: {user_id}")
-            print(f"Today: {today}")
-            print(f"Current Time: {current_time}")
-        
-            # Get today's attendance record
-            query = "SELECT id, check_in FROM attendance WHERE staff_id = %s AND date = %s AND check_out IS NULL"
-            result = self.db.execute_query(query, (user_id, today))
-        
-            print(f"Query result: {result}")
-        
-            if not result or len(result) == 0:
-                print("No check-in found for today")
-                return False
-        
-            # Extract data from dictionary
-            record = result[0]
-            record_id = record['id']
-            check_in_time = record['check_in']
-        
-            print(f"Record ID: {record_id}")
-            print(f"Check-in Time: {check_in_time}")
-            print(f"Check-in Time Type: {type(check_in_time)}")
-        
-            if not check_in_time:
-                print("No check-in time found")
-                return False
-        
-            # Calculate hours worked
-            hours_worked = (current_time - check_in_time).total_seconds() / 3600.0
-            print(f"Hours worked: {hours_worked:.2f}")
-        
-            # Update the record
-            update_query = """
-                UPDATE attendance 
-                SET check_out = %s, hours_worked = %s 
-                WHERE id = %s
-            """
-            print(f"Update query: {update_query}")
-            print(f"Update params: ({current_time}, {hours_worked}, {record_id})")
-        
-            success = self.db.execute_query(update_query, (current_time, hours_worked, record_id))
-            print(f"Update success: {success}")
-        
-            # Check if update actually worked by querying the record again
-            if success:
-                verify_query = "SELECT check_out, hours_worked FROM attendance WHERE id = %s"
-                verify_result = self.db.execute_query(verify_query, (record_id,))
-                print(f"Verification result: {verify_result}")
-        
-            return bool(success)
-        
-        except Exception as e:
-            print(f"Error during check-out: {e}")
-            import traceback
-            traceback.print_exc()
-            return False
+    def check_out(self):
+        if self.attendance_model.check_out(self.user_id):
+            msg = QMessageBox(self)
+            msg.setWindowTitle("Success")
+            msg.setText("Checked out successfully!")
+            msg.setIcon(QMessageBox.Icon.Information)
+            msg.setStyleSheet("""
+                QMessageBox {
+                    background-color: white;
+                }
+                QMessageBox QLabel {
+                    color: black;
+                    background-color: white;
+                }
+                QMessageBox QPushButton {
+                    background-color: #5ab9ea;
+                    color: white;
+                    padding: 8px 15px;
+                    border: none;
+                    border-radius: 5px;
+                    font-weight: bold;
+                    min-width: 80px;
+                }
+                QMessageBox QPushButton:hover {
+                    background-color: #78d1ff;
+                }
+            """)
+            msg.exec()
+            self.update_today_status()
+            self.load_attendance()
+        else:
+            msg = QMessageBox(self)
+            msg.setWindowTitle("Error")
+            msg.setText("Failed to check out")
+            msg.setIcon(QMessageBox.Icon.Warning)
+            msg.setStyleSheet("""
+                QMessageBox {
+                    background-color: white;
+                }
+                QMessageBox QLabel {
+                    color: black;
+                    background-color: white;
+                }
+                QMessageBox QPushButton {
+                    background-color: #e74c3c;
+                    color: white;
+                    padding: 8px 15px;
+                    border: none;
+                    border-radius: 5px;
+                    font-weight: bold;
+                    min-width: 80px;
+                }
+                QMessageBox QPushButton:hover {
+                    background-color: #c0392b;
+                }
+            """)
+            msg.exec()
     
     def load_attendance(self):
         selected_date = self.month_combo.date().toPyDate()
@@ -259,14 +381,15 @@ class AttendancePanel(QWidget):
             status_item = QTableWidgetItem()
             if record['check_in'] and record['check_out']:
                 status_item.setText("Completed")
-                status_item.setBackground(Qt.GlobalColor.green)
                 status_item.setForeground(Qt.GlobalColor.white)
+                status_item.setBackground(Qt.GlobalColor.darkGreen)
             elif record['check_in'] and not record['check_out']:
                 status_item.setText("In Progress")
+                status_item.setForeground(Qt.GlobalColor.black)
                 status_item.setBackground(Qt.GlobalColor.yellow)
             else:
                 status_item.setText("Absent")
-                status_item.setBackground(Qt.GlobalColor.red)
                 status_item.setForeground(Qt.GlobalColor.white)
+                status_item.setBackground(Qt.GlobalColor.darkRed)
             
             self.attendance_table.setItem(row, 4, status_item)
