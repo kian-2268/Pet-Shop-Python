@@ -26,7 +26,7 @@ class CustomerProductsPanel(QWidget):
         # Header
         header_layout = QHBoxLayout()
         title = QLabel("Available Products")
-        title.setStyleSheet("background-color: #f9fafb; font-size: 40px; font-weight: bold; color: black;")
+        title.setStyleSheet("background-color: #f9fafb; font-size: 25px; font-weight: bold; color: black;")
         header_layout.addWidget(title)
         
         header_layout.addStretch()
@@ -321,7 +321,7 @@ class CustomerProductsPanel(QWidget):
             add_btn.setDisabled(True)
             quantity_spin.setDisabled(True)
         else:
-            add_btn.clicked.connect(lambda: self.add_to_cart(product, quantity_spin.value()))
+            add_btn.clicked.connect(lambda: self.add_to_cart(product['id'], quantity_spin.value()))
         
         cart_layout.addWidget(quantity_spin)
         cart_layout.addWidget(add_btn)
@@ -330,14 +330,102 @@ class CustomerProductsPanel(QWidget):
         card.setLayout(layout)
         return card
     
-    def add_to_cart(self, product, quantity):
+    def add_to_cart(self, product_id, quantity):
         try:
-            result = self.cart_model.add_to_cart(self.user_id, 'product', product['id'], quantity)
+            result = self.cart_model.add_to_cart(self.user_id, 'product', product_id, quantity)
             if result:
-                QMessageBox.information(self, "Success", f"{quantity}x {product['name']} added to cart!")
-                if hasattr(self.parent(), 'cart_updated'):
-                    self.parent().cart_updated.emit()
+            # Create styled message box
+                msg_box = QMessageBox(self)
+                msg_box.setWindowTitle("Success")
+                msg_box.setText("Product added to cart!")
+                msg_box.setIcon(QMessageBox.Icon.Information)
+                msg_box.setStyleSheet("""
+                    QMessageBox {
+                        background-color: white;
+                    }
+                    QMessageBox QLabel {
+                        color: black;
+                        background-color: white;
+                    }
+                    QMessageBox QPushButton {
+                        background-color: #5ab9ea;
+                        color: white;
+                        padding: 8px 15px;
+                        border: none;
+                        border-radius: 5px;
+                        font-weight: bold;
+                        min-width: 80px;
+                    }
+                    QMessageBox QPushButton:hover {
+                        background-color: #78d1ff;
+                    }
+                """)
+                msg_box.exec()
+            
+                # Refresh the cart panel
+                self.refresh_cart_panel()
             else:
-                QMessageBox.warning(self, "Error", "Failed to add product to cart")
+                msg_box = QMessageBox(self)
+                msg_box.setWindowTitle("Error")
+                msg_box.setText("Failed to add product to cart")
+                msg_box.setIcon(QMessageBox.Icon.Warning)
+                msg_box.setStyleSheet("""
+                    QMessageBox {
+                        background-color: white;
+                    }
+                    QMessageBox QLabel {
+                        color: black;
+                        background-color: white;
+                    }
+                    QMessageBox QPushButton {
+                        background-color: #e74c3c;
+                        color: white;
+                        padding: 8px 15px;
+                        border: none;
+                        border-radius: 5px;
+                        font-weight: bold;
+                        min-width: 80px;
+                    }
+                    QMessageBox QPushButton:hover {
+                        background-color: #c0392b;
+                    }
+                """)
+                msg_box.exec()
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
+            msg_box = QMessageBox(self)
+            msg_box.setWindowTitle("Error")
+            msg_box.setText(f"An error occurred: {str(e)}")
+            msg_box.setIcon(QMessageBox.Icon.Critical)
+            msg_box.setStyleSheet("""
+                QMessageBox {
+                    background-color: white;
+                }
+                QMessageBox QLabel {
+                    color: black;
+                    background-color: white;
+                }
+                QMessageBox QPushButton {
+                    background-color: #e74c3c;
+                    color: white;
+                    padding: 8px 15px;
+                    border: none;
+                    border-radius: 5px;
+                    font-weight: bold;
+                    min-width: 80px;
+                }
+                QMessageBox QPushButton:hover {
+                    background-color: #c0392b;
+                }
+            """)
+            msg_box.exec()
+    
+    def refresh_cart_panel(self):
+        # CustomerDashboard has a direct reference to cart_panel
+        parent = self.parent()
+        while parent:
+            if hasattr(parent, 'cart_panel'):
+                parent.cart_panel.refresh_cart()
+                return True
+            parent = parent.parent()
+        
+        return False
