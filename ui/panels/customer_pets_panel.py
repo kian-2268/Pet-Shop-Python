@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
                              QPushButton, QScrollArea, QComboBox, QLineEdit,
                              QMessageBox, QGroupBox, QDialog, QFormLayout,
-                             QDialogButtonBox, QTextEdit)
+                             QDialogButtonBox, QTextEdit, QGridLayout)
 from PyQt6.QtCore import Qt
 import os
 from PyQt6.QtGui import QPixmap
@@ -175,7 +175,7 @@ class CustomerPetsPanel(QWidget):
             widget = self.pets_layout.itemAt(i).widget()
             if widget:
                 widget.setParent(None)
-        
+    
         if not pets:
             # Show no results message
             no_results = QLabel("No pets found matching your criteria.")
@@ -183,33 +183,36 @@ class CustomerPetsPanel(QWidget):
             no_results.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.pets_layout.addWidget(no_results)
             return
-        
-        # Create a grid layout for pets
+    
+        # Create a grid widget using QGridLayout (like POS system)
         grid_widget = QWidget()
         grid_layout = QHBoxLayout(grid_widget)
         grid_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        
-        current_row_layout = QVBoxLayout()
-        current_row_layout.setSpacing(15)
-        
-        for i, pet in enumerate(pets):
-            pet_card = self.create_pet_card(pet)
-            current_row_layout.addWidget(pet_card)
-            
-            # Start new column after every 2 pets
-            if (i + 1) % 2 == 0:
-                grid_layout.addLayout(current_row_layout)
-                current_row_layout = QVBoxLayout()
-                current_row_layout.setSpacing(15)
-        
-        if current_row_layout.count() > 0:
-            grid_layout.addLayout(current_row_layout)
-        
-        self.pets_layout.addWidget(grid_widget)
     
+        # Create container with QGridLayout
+        container = QWidget()
+        container_layout = QGridLayout(container)
+        container_layout.setHorizontalSpacing(10)
+        container_layout.setVerticalSpacing(20)
+        container_layout.setContentsMargins(0, 0, 0, 0)
+    
+        # Calculate number of rows needed (4 items per row)
+        num_rows = (len(pets) + 1) // 4  # Integer division for rows
+    
+        # Add pets to grid
+        for i, pet in enumerate(pets):
+            row = i // 4
+            col = i % 4
+            pet_card = self.create_pet_card(pet)
+            container_layout.addWidget(pet_card, row, col)
+    
+        # Add container to grid widget
+        grid_layout.addWidget(container)
+        self.pets_layout.addWidget(grid_widget)
+
     def create_pet_card(self, pet):
         card = QGroupBox()
-        card.setFixedSize(350, 500)
+        card.setFixedSize(450, 500)
         card.setStyleSheet("""
             QGroupBox {
                 border: 2px solid #e1e1e1;
