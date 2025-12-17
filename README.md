@@ -147,7 +147,7 @@ The system uses a relational database with the following key tables:
 - `attendance` - Staff attendance management
 
 ### **Architecture Patterns**
-- **Model-View-Controller (MVC)** - Separates data (models), UI (views), and logic
+- **Model-View (MV)** - Separates data (models), UI (views)
 - **Repository Pattern** - Encapsulates database operations in model classes
 - **Observer Pattern** - Uses PyQt6 signals for UI updates
 
