@@ -543,7 +543,7 @@ class AddEditPetDialog(QDialog):
         
         basic_layout.addWidget(QLabel("Price *:"), 2, 2)
         self.price_input = QDoubleSpinBox()
-        self.price_input.setRange(0, 10000)
+        self.price_input.setRange(0, 999999.99)
         self.price_input.setPrefix("₱ ")
         self.price_input.setDecimals(2)
         self.price_input.setStyleSheet("""
