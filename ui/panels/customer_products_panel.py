@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
                              QPushButton, QScrollArea, QComboBox, QLineEdit,
-                             QMessageBox, QGroupBox, QSpinBox)
+                             QMessageBox, QGroupBox, QSpinBox, QGridLayout)
 from PyQt6.QtCore import Qt
 import os
 from PyQt6.QtGui import QPixmap
@@ -183,22 +183,25 @@ class CustomerProductsPanel(QWidget):
         grid_layout = QHBoxLayout(grid_widget)
         grid_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         
-        current_row_layout = QVBoxLayout()
-        current_row_layout.setSpacing(15)
+        # Create container with QGridLayout
+        container = QWidget()
+        container_layout = QGridLayout(container)
+        container_layout.setHorizontalSpacing(10)
+        container_layout.setVerticalSpacing(20)
+        container_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Calculate number of rows needed (4 items per row)
+        num_rows = (len(products) + 1) // 4  # Integer division for rows
         
-        for i, product in enumerate(products):
-            if product['quantity'] > 0:
-                product_card = self.create_product_card(product)
-                current_row_layout.addWidget(product_card)
+        # Add products to grid
+        for i, products in enumerate(products):
+            row = i // 4
+            col = i % 4
+            product_card = self.create_product_card(products)
+            container_layout.addWidget(product_card, row, col)
                 
-                if (i + 1) % 2 == 0:
-                    grid_layout.addLayout(current_row_layout)
-                    current_row_layout = QVBoxLayout()
-                    current_row_layout.setSpacing(15)
-        
-        if current_row_layout.count() > 0:
-            grid_layout.addLayout(current_row_layout)
-        
+        # Add container to grid widget
+        grid_layout.addWidget(container)
         self.products_layout.addWidget(grid_widget)
     
     def create_product_card(self, product):
