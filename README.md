@@ -116,17 +116,17 @@ Pet-Shop-Python/
 
 | **Panel** | **Description** | **Screenshot** |
 |-----------|-----------------|----------------|
-| **Login Window** | Secure authentication with role-based access | <img width="400" alt="Login" src="<img width="940" height="500" alt="image" src="https://github.com/user-attachments/assets/7c46e53c-ed1e-43f1-9231-f3e2d11a861a" />
+| **Login Window** | Secure authentication with role-based access | <img width="940" height="500" alt="image" src="https://github.com/user-attachments/assets/7c46e53c-ed1e-43f1-9231-f3e2d11a861a" />
 " /> |
-| **Pet Management** | Complete CRUD operations for pet inventory | <img width="400" alt="Pet Management" src="<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/68d16d55-9d8e-4fe7-9762-03a7ba7aee94" />
+| **Pet Management** | Complete CRUD operations for pet inventory | <img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/68d16d55-9d8e-4fe7-9762-03a7ba7aee94" />
 " /> |
-| **Product Catalog** | Browse products with search and filtering | <img width="400" alt="Products" src="<img width="940" height="499" alt="image" src="https://github.com/user-attachments/assets/770b0f87-d8b1-43ff-9f1f-982f409a2d0f" />
+| **Product Catalog** | Browse products with search and filtering | <img width="940" height="499" alt="image" src="https://github.com/user-attachments/assets/770b0f87-d8b1-43ff-9f1f-982f409a2d0f" />
 " /> |
-| **Shopping Cart** | Manage cart items and proceed to checkout | <img width="400" alt="Cart" src="<img width="940" height="499" alt="image" src="https://github.com/user-attachments/assets/81cc5666-cf38-40f0-b73c-2695da7c050a" />
+| **Shopping Cart** | Manage cart items and proceed to checkout | <img width="940" height="499" alt="image" src="https://github.com/user-attachments/assets/81cc5666-cf38-40f0-b73c-2695da7c050a" />
 " /> |
-| **Appointment Booking** | Schedule pet services with date/time selection | <img width="400" alt="Appointments" src="<img width="940" height="499" alt="image" src="https://github.com/user-attachments/assets/87cf42f0-88bf-4535-b780-0a0c68d5e563" />
+| **Appointment Booking** | Schedule pet services with date/time selection | <img width="940" height="499" alt="image" src="https://github.com/user-attachments/assets/87cf42f0-88bf-4535-b780-0a0c68d5e563" />
 " /> |
-| **Order History** | Track past purchases with status updates | <img width="400" alt="Order History" src="<img width="940" height="499" alt="image" src="https://github.com/user-attachments/assets/043b8c8a-1d80-48d0-bc47-200e4754cc19" />
+| **Order History** | Track past purchases with status updates | <img width="940" height="499" alt="image" src="https://github.com/user-attachments/assets/043b8c8a-1d80-48d0-bc47-200e4754cc19" />
 " /> |
 
 ---
@@ -161,9 +161,9 @@ The system uses a relational database with the following key tables:
 
 ## 📊 Entity-Relationship Diagram (ERD)
 
-| **Diagram Type** | **Description** | **Diagram** |
-|------------------|-----------------|
-| **Entity-Relationship Diagram (ERD)** | Shows database entities, their attributes, and relationships between tables. This ERD illustrates the complete database schema for the Pet Shop Management System. | <img width="809" height="1454" alt="image" src="https://github.com/user-attachments/assets/8d1a124f-900d-4f7c-a69b-6b020bba3b8e" />
+| **Diagram Type**                      | **Description**                                                                                                                                                                   | **Preview**                                                                                                                               |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| **Entity-Relationship Diagram (ERD)** | Illustrates the database entities, their attributes, and the relationships between tables. This ERD represents the complete database structure of the Pet Shop Management System. | <img width="809" height="1454" alt="ERD Diagram" src="https://github.com/user-attachments/assets/8d1a124f-900d-4f7c-a69b-6b020bba3b8e" /> |
 
 ---
 
